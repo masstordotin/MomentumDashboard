@@ -33,8 +33,8 @@ PERPLEXITY_API_KEY = os.environ.get("PERPLEXITY_API_KEY", "YOUR_PPLX_API_KEY_HER
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "YOUR_GITHUB_TOKEN_HERE")
 
 # Your GitHub username and repo name (the one serving the dashboard)
-GITHUB_USER = "YOUR_GITHUB_USERNAME"
-GITHUB_REPO = "YOUR_REPO_NAME"
+GITHUB_USER = "masstordontin"
+GITHUB_REPO = "MomentumDashboard"
 
 # The branch that GitHub Pages serves from (e.g., 'main' or 'gh-pages')
 GITHUB_BRANCH = "main"
