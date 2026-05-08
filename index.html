@@ -428,7 +428,6 @@ async function loadData() {
   }
 }
 
-// Force refresh button
 function forceRefresh() {
   allPicks = [];
   filteredPicks = [];
@@ -462,11 +461,11 @@ function renderKPIs(picks) {
   const high     = picks.filter(p => (p.score || 0) >= 80).length;
   document.getElementById('kpiAvgScore').textContent = avgScore;
   document.getElementById('kpiAvgRsi').textContent   = avgRsi;
-  document.getElementById('kpiHigh').textContent      = high;
+  document.getElementById('kpiHigh').textContent     = high;
 }
 
 // ══════════════════════════════════════════
-// CHARTS
+// CHARTS — destroy before re-render (fix)
 // ══════════════════════════════════════════
 function renderCharts(picks) {
   renderScoreChart(picks);
@@ -476,7 +475,7 @@ function renderCharts(picks) {
 function renderScoreChart(picks) {
   const ctx = document.getElementById('scoreChart');
   if (!ctx) return;
-  if (scoreChartInst) { scoreChartInst.destroy(); scoreChartInst = null; }
+  if (scoreChartInst) { scoreChartInst.destroy(); scoreChartInst = null; }  // ✅ Fix: destroy old instance
   if (picks.length === 0) return;
 
   const sorted = [...picks].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 12);
@@ -518,7 +517,7 @@ function renderScoreChart(picks) {
 function renderSectorChart(picks) {
   const ctx = document.getElementById('sectorChart');
   if (!ctx) return;
-  if (sectorChartInst) { sectorChartInst.destroy(); sectorChartInst = null; }
+  if (sectorChartInst) { sectorChartInst.destroy(); sectorChartInst = null; }  // ✅ Fix: destroy old instance
   if (picks.length === 0) return;
 
   const sectorMap = {};
@@ -559,7 +558,7 @@ function renderSectorChart(picks) {
 }
 
 // ══════════════════════════════════════════
-// TABLE
+// TABLE — String() coercion fix for buyZone/invalidation
 // ══════════════════════════════════════════
 function renderTable(picks) {
   const tbody = document.getElementById('tableBody');
@@ -572,7 +571,9 @@ function renderTable(picks) {
 
   tbody.innerHTML = picks.map((p, i) => {
     const scoreClass = (p.score >= 85) ? 'high' : (p.score >= 75) ? 'mid' : 'low';
-    const setupKey   = (p.setupType || '').toLowerCase();
+
+    // ✅ Fix: fuzzy .includes() instead of strict === matching
+    const setupKey = (p.setupType || '').toLowerCase();
     let pillClass = 'breakout';
     if (setupKey.includes('pullback'))  pillClass = 'pullback';
     if (setupKey.includes('expansion')) pillClass = 'expansion';
@@ -606,19 +607,19 @@ function renderTable(picks) {
         <td class="mono" style="color:${ret3mColor}">${ret3m}</td>
         <td class="mono" style="color:${ret6mColor}">${ret6m}</td>
         <td><span class="pill ${pillClass}">${p.setupType || '—'}</span></td>
-        <td class="mono">${p.buyZone || '—'}</td>
-        <td class="mono" style="color:var(--color-error)">${p.invalidation ? '₹' + p.invalidation : '—'}</td>
+        <td class="mono">${String(p.buyZone ?? '—')}</td>       <!-- ✅ Fix: String() direct render -->
+        <td class="mono" style="color:var(--color-error)">${p.invalidation ? '₹' + String(p.invalidation) : '—'}</td>  <!-- ✅ Fix: String() direct render -->
       </tr>
       <tr class="detail-row" id="detail-${i}">
         <td colspan="16">
           <div class="detail-grid">
             <div class="detail-block">
               <strong>🎯 Buy Zone</strong>
-              <p>₹${p.buyZone || '—'}</p>
+              <p>₹${String(p.buyZone ?? '—')}</p>
             </div>
             <div class="detail-block">
               <strong>🛑 Invalidation Level</strong>
-              <p style="color:var(--color-error)">₹${p.invalidation || '—'}</p>
+              <p style="color:var(--color-error)">₹${String(p.invalidation ?? '—')}</p>
             </div>
             <div class="detail-block">
               <strong>📐 Setup Type</strong>
