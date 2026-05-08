@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Momentum Dashboard</title>
-  <link rel="preconnect" href="https://api.fontshare.com">
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  //api.fontshare.com">
+  //api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     :root,[data-theme="light"]{
       --text-xs:clamp(.75rem,.7rem + .25vw,.875rem);
@@ -36,11 +36,10 @@
     .brand{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-8)}
     .logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,color-mix(in oklab,var(--color-primary) 26%, transparent),color-mix(in oklab,var(--color-blue) 18%, transparent));border:1px solid color-mix(in oklab,var(--color-primary) 30%, transparent)}
     .brand h1{font-size:var(--text-lg);line-height:1.1;margin:0}.brand p{font-size:var(--text-xs);color:var(--color-text-muted);margin:.25rem 0 0}
-    .nav-section{margin-bottom:var(--space-8)} .nav-label,.section-label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+    .nav-section{margin-bottom:var(--space-8)}.nav-label,.section-label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted);margin-bottom:var(--space-3)}
     .nav-item{display:flex;align-items:center;gap:var(--space-3);padding:.8rem .9rem;border-radius:var(--radius-lg);color:var(--color-text-muted);margin-bottom:.35rem}.nav-item.active,.nav-item:hover{background:color-mix(in oklab,var(--color-primary) 10%, var(--color-surface));color:var(--color-text)}
     .market-box{padding:var(--space-4);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);border-radius:var(--radius-xl);background:var(--color-surface-offset);box-shadow:var(--shadow-sm)}
-    .signal{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .7rem;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700}.signal.bull{background:color-mix(in oklab,var(--color-success) 18%, transparent);color:var(--color-success)}
-    .signal.sel{background:color-mix(in oklab,var(--color-orange) 18%, transparent);color:var(--color-orange)}
+    .signal{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .7rem;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700}.signal.bull{background:color-mix(in oklab,var(--color-success) 18%, transparent);color:var(--color-success)}.signal.sel{background:color-mix(in oklab,var(--color-orange) 18%, transparent);color:var(--color-orange)}
     .topbar{display:flex;align-items:center;gap:var(--space-3)}
     .chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .8rem;background:var(--color-surface);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);border-radius:var(--radius-full);font-size:var(--text-sm);color:var(--color-text-muted)}
     .theme-toggle,.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);background:var(--color-surface);padding:.75rem 1rem;border-radius:var(--radius-lg)}
@@ -49,20 +48,26 @@
     .page-head h2{font-size:var(--text-xl);line-height:1.05;margin:0}.page-head p{margin:.6rem 0 0;color:var(--color-text-muted);max-width:70ch}
     .grid{display:grid;gap:var(--space-4)}.kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:var(--space-6)}
     .card{background:var(--color-surface);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}.chart-card{padding:var(--space-5) var(--space-5) var(--space-6)}
-    .card.pad{padding:var(--space-5)} .kpi h3{font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted);margin:0 0 .75rem}.kpi .value{font-size:1.9rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums lining-nums}.kpi .sub{margin-top:.65rem;font-size:var(--text-sm);color:var(--color-text-muted)}
+    .card.pad{padding:var(--space-5)}.kpi h3{font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted);margin:0 0 .75rem}.kpi .value{font-size:1.9rem;font-weight:900;line-height:1;font-variant-numeric:tabular-nums lining-nums}.kpi .sub{margin-top:.65rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .content-grid{grid-template-columns:minmax(0,1.45fr) minmax(420px,.95fr);align-items:start}
     .toolbar{display:grid;grid-template-columns:1.15fr repeat(3,minmax(110px,.72fr)) .8fr auto;gap:var(--space-3);margin-bottom:var(--space-4)}
     .field{display:flex;flex-direction:column;gap:.4rem}.field label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted)}
-    .input,.select,.textarea{width:100%;padding:.82rem .9rem;border-radius:var(--radius-lg);border:1px solid color-mix(in oklab,var(--color-text) 12%, transparent);background:var(--color-surface-2)} .textarea{min-height:96px;resize:vertical}
+    .input,.select,.textarea{width:100%;padding:.82rem .9rem;border-radius:var(--radius-lg);border:1px solid color-mix(in oklab,var(--color-text) 12%, transparent);background:var(--color-surface-2)}.textarea{min-height:96px;resize:vertical}
     .table-wrap{overflow:auto;max-width:100%}.data-table th,.data-table td{padding:.9rem .85rem;border-bottom:1px solid color-mix(in oklab,var(--color-text) 8%, transparent);text-align:left;vertical-align:top}.data-table th{position:sticky;top:0;background:var(--color-surface);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted)}
-    .data-table td{font-size:var(--text-sm)} .mono{font-variant-numeric:tabular-nums lining-nums}.score{font-weight:900}.score.high{color:var(--color-success)}.score.mid{color:var(--color-orange)}
+    .data-table td{font-size:var(--text-sm)}.mono{font-variant-numeric:tabular-nums lining-nums}.score{font-weight:900}.score.high{color:var(--color-success)}.score.mid{color:var(--color-orange)}
     .pill{display:inline-flex;padding:.38rem .6rem;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700}.pill.pullback{background:color-mix(in oklab,var(--color-blue) 18%, transparent);color:var(--color-blue)}.pill.breakout{background:color-mix(in oklab,var(--color-primary) 18%, transparent);color:var(--color-primary)}.pill.expansion{background:color-mix(in oklab,var(--color-purple) 18%, transparent);color:var(--color-purple)}
     .tag{display:inline-flex;padding:.28rem .5rem;border-radius:999px;font-size:var(--text-xs);background:var(--color-surface-offset);color:var(--color-text-muted);margin:.15rem .2rem .15rem 0}
     .mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4);align-items:stretch}.mini>.card{height:100%}.top-checks{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:var(--space-4)}
-    .list{display:flex;flex-direction:column;gap:var(--space-3)} .pick-item{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 8%, transparent)}
-    .pick-item h4{margin:0 0 .35rem;font-size:var(--text-base)} .muted{color:var(--color-text-muted)} .small{font-size:var(--text-sm)}
+    .list{display:flex;flex-direction:column;gap:var(--space-3)}.pick-item{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 8%, transparent)}
+    .pick-item h4{margin:0 0 .35rem;font-size:var(--text-base)}.muted{color:var(--color-text-muted)}.small{font-size:var(--text-sm)}
     .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-top:var(--space-4)}
     .foot{margin-top:var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted)}
+    /* Loading state */
+    .loading-state{display:flex;align-items:center;justify-content:center;padding:var(--space-10);color:var(--color-text-muted);font-size:var(--text-sm);gap:var(--space-3)}
+    .spinner{width:18px;height:18px;border:2px solid var(--color-border);border-top-color:var(--color-primary);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    /* Last updated badge */
+    .last-updated{font-size:var(--text-xs);color:var(--color-text-muted);padding:.3rem .7rem;background:var(--color-surface-offset);border-radius:var(--radius-full);border:1px solid color-mix(in oklab,var(--color-text) 8%,transparent)}
     @media (max-width:1180px){.dashboard{grid-template-columns:84px 1fr}.brand-copy,.nav-text,.section-label,.market-copy{display:none}.toolbar{grid-template-columns:1fr 1fr}.content-grid,.kpi-grid,.editor-grid,.mini,.top-checks{grid-template-columns:1fr}}
     @media (max-width:760px){html,body{overflow:auto}.dashboard{display:block;height:auto}.sidebar{display:none}.header{position:sticky}.main{overflow:visible;padding:var(--space-4)}.page-head{flex-direction:column}.toolbar{grid-template-columns:1fr}.topbar{flex-wrap:wrap}}
   </style>
@@ -104,16 +109,19 @@
         </div>
       </div>
     </aside>
+
     <header class="header">
       <div>
-        <div class="small muted">Friday, May 8, 2026</div>
+        <div class="small muted" id="headerDate">Loading...</div>
         <strong>Daily institutional momentum dashboard</strong>
       </div>
       <div class="topbar">
         <div class="chip">Universe: NSE / NIFTY500 focus</div>
+        <span class="last-updated" id="lastUpdated">Fetching data…</span>
         <button class="theme-toggle" data-theme-toggle aria-label="Switch theme">☾</button>
       </div>
     </header>
+
     <main class="main">
       <section id="overview">
         <div class="page-head">
@@ -124,13 +132,15 @@
           <button class="btn primary" id="downloadJson">Export picks JSON</button>
         </div>
 
+        <!-- KPI row -->
         <div class="grid kpi-grid">
-          <div class="card pad kpi"><h3>Active picks</h3><div class="value" id="kpiCount">0</div><div class="sub">Filtered names today</div></div>
-          <div class="card pad kpi"><h3>Avg momentum</h3><div class="value" id="kpiMomentum">0</div><div class="sub">Composite continuation score</div></div>
-          <div class="card pad kpi"><h3>Avg RSI</h3><div class="value" id="kpiRsi">0</div><div class="sub">Sweet spot for swing follow-through</div></div>
-          <div class="card pad kpi"><h3>High conviction</h3><div class="value" id="kpiHighConviction">0</div><div class="sub">Score 80 and above</div></div>
+          <div class="card pad kpi"><h3>Active picks</h3><div class="value" id="kpiCount">—</div><div class="sub">Filtered names today</div></div>
+          <div class="card pad kpi"><h3>Avg momentum</h3><div class="value" id="kpiMomentum">—</div><div class="sub">Composite continuation score</div></div>
+          <div class="card pad kpi"><h3>Avg RSI</h3><div class="value" id="kpiRsi">—</div><div class="sub">Sweet spot for swing follow-through</div></div>
+          <div class="card pad kpi"><h3>High conviction</h3><div class="value" id="kpiHighConviction">—</div><div class="sub">Score 80 and above</div></div>
         </div>
 
+        <!-- Checklists -->
         <div class="grid mini top-checks">
           <div class="card pad check-card">
             <div class="section-label">Entry checklist</div>
@@ -152,6 +162,7 @@
           </div>
         </div>
 
+        <!-- Table + Charts -->
         <div class="grid content-grid">
           <section class="card pad" id="watchlist">
             <div class="page-head" style="margin-bottom:var(--space-4)">
@@ -159,266 +170,8 @@
                 <h2 style="font-size:var(--text-lg)">Watchlist table</h2>
                 <p class="small">Filter by sector, setup type, market cap bucket and minimum score.</p>
               </div>
-              <div class="signal sel" id="tableStatus">Live filter</div>
+              <div class="signal sel" id="tableStatus">Loading…</div>
             </div>
             <div class="toolbar">
-              <div class="field"><label for="searchBox">Search</label><input id="searchBox" class="input" placeholder="TVS, ports, auto..." /></div>
-              <div class="field"><label for="sectorFilter">Sector</label><select id="sectorFilter" class="select"><option value="all">All sectors</option></select></div>
-              <div class="field"><label for="capFilter">Bucket</label><select id="capFilter" class="select"><option value="all">All caps</option><option>Large Cap</option><option>Mid Cap</option><option>Small Cap</option></select></div>
-              <div class="field"><label for="setupFilter">Setup</label><select id="setupFilter" class="select"><option value="all">All setups</option><option>Pullback continuation</option><option>Breakout continuation</option><option>Momentum expansion</option></select></div>
-              <div class="field"><label for="scoreFilter">Min score</label><input id="scoreFilter" class="input" type="number" min="0" max="100" value="70" /></div>
-              <div class="field"><label>&nbsp;</label><button class="btn" id="resetFilters">Reset</button></div>
-            </div>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Stock</th>
-                    <th>Sector</th>
-                    <th>Bucket</th>
-                    <th>Score</th>
-                    <th>Price</th>
-                    <th>RSI</th>
-                    <th>50 / 200 EMA</th>
-                    <th>Vol ratio</th>
-                    <th>1M / 3M / 6M</th>
-                    <th>Setup</th>
-                    <th>Buy zone</th>
-                    <th>Invalidation</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="grid">
-            <div class="card chart-card">
-              <div class="page-head" style="margin-bottom:var(--space-4)">
-                <div>
-                  <h2 style="font-size:var(--text-lg)">Momentum score map</h2>
-                  <p class="small">Top names ranked by composite continuation quality.</p>
-                </div>
-              </div>
-              <div class="chart-wrap" style="height:320px"><canvas id="scoreChart"></canvas></div>
-            </div>
-            <div class="card chart-card">
-              <div class="page-head" style="margin-bottom:var(--space-4)">
-                <div>
-                  <h2 style="font-size:var(--text-lg)">Sector concentration</h2>
-                  <p class="small">Where momentum leadership is clustering.</p>
-                </div>
-              </div>
-              <div class="chart-wrap" style="height:320px"><canvas id="sectorChart"></canvas></div>
-            </div>
-          </section>
-        </div>
-      </section>
-
-      <section id="editor" class="card pad" style="margin-top:var(--space-6)">
-        <div class="page-head" style="margin-bottom:var(--space-4)">
-          <div>
-            <h2 style="font-size:var(--text-lg)">Add or update a pick</h2>
-            <p class="small">Seeded with the screened names from the earlier momentum outputs. Edit directly and rebuild your daily board.</p>
-          </div>
-          <button class="btn" id="prefillBtn">Load sample fields</button>
-        </div>
-        <div class="editor-grid">
-          <div class="field"><label>Stock name</label><input class="input" id="fName" placeholder="TVS Motor" /></div>
-          <div class="field"><label>Symbol</label><input class="input" id="fSymbol" placeholder="TVSMOTOR" /></div>
-          <div class="field"><label>Sector</label><input class="input" id="fSector" placeholder="Auto" /></div>
-          <div class="field"><label>Bucket</label><select class="select" id="fBucket"><option>Large Cap</option><option>Mid Cap</option><option>Small Cap</option></select></div>
-          <div class="field"><label>Price</label><input class="input" id="fPrice" type="number" step="0.01" /></div>
-          <div class="field"><label>RSI(14)</label><input class="input" id="fRsi" type="number" step="0.1" /></div>
-          <div class="field"><label>50 EMA</label><input class="input" id="fEma50" type="number" step="0.01" /></div>
-          <div class="field"><label>200 EMA</label><input class="input" id="fEma200" type="number" step="0.01" /></div>
-          <div class="field"><label>Volume ratio</label><input class="input" id="fVol" type="number" step="0.1" placeholder="1.8" /></div>
-          <div class="field"><label>1M return %</label><input class="input" id="f1m" type="number" step="0.1" /></div>
-          <div class="field"><label>3M return %</label><input class="input" id="f3m" type="number" step="0.1" /></div>
-          <div class="field"><label>6M return %</label><input class="input" id="f6m" type="number" step="0.1" /></div>
-          <div class="field"><label>Setup type</label><select class="select" id="fSetup"><option>Pullback continuation</option><option>Breakout continuation</option><option>Momentum expansion</option></select></div>
-          <div class="field"><label>Momentum score</label><input class="input" id="fScore" type="number" min="0" max="100" step="1" /></div>
-          <div class="field"><label>Ideal buy zone</label><input class="input" id="fBuy" placeholder="₹10,150–10,320" /></div>
-          <div class="field"><label>Invalidating level</label><input class="input" id="fInvalid" placeholder="Close below ₹9,840" /></div>
-        </div>
-        <div class="field" style="margin-top:var(--space-4)"><label>1–8 week thesis</label><textarea class="textarea" id="fThesis" placeholder="Auto leader in a stage-2 uptrend; shallow pullback into rising 20/50 EMA offers continuation if sector breadth holds."></textarea></div>
-        <div class="field" style="margin-top:var(--space-4)"><label>Indicator note</label><textarea class="textarea" id="fIndicator" placeholder="Price > 50 EMA > 200 EMA, RSI stable near 63, volume expansion on breakout day, clean HH/HL structure."></textarea></div>
-        <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4);flex-wrap:wrap">
-          <button class="btn primary" id="addPickBtn">Add pick</button>
-          <button class="btn" id="clearFormBtn">Clear form</button>
-        </div>
-        <div class="foot">Tip: keep the daily list to 8–15 names and refresh only when structure, RSI and volume still support continuation.</div>
-      </section>
-    </main>
-  </div>
-
-  <script>
-    // Fallback seed data (used if fetch fails)
-const seededPicks = []; // keep empty or put 1-2 fallback items
-
-let picks = [];
-
-async function loadPicksAndRender() {
-  try {
-    // Cache-busting timestamp forces fresh fetch every load
-    const res = await fetch(`momentum-picks.json?v=${Date.now()}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    picks = await res.json();
-    console.log(`✅ Loaded ${picks.length} picks from momentum-picks.json`);
-  } catch (err) {
-    console.warn('⚠️ Could not load momentum-picks.json, using seed data.', err);
-    picks = seededPicks;
-  }
-  // Call all your existing render functions here
-  renderTable();
-  renderKPIs();
-  renderMomentumChart();
-  renderSectorChart();
-}
-
-// Replace your old renderTable() / init call at bottom with:
-loadPicksAndRender();
-
-    let scoreChart, sectorChart;
-
-    const els = {
-      tableBody: document.getElementById('tableBody'),
-      search: document.getElementById('searchBox'),
-      sector: document.getElementById('sectorFilter'),
-      cap: document.getElementById('capFilter'),
-      setup: document.getElementById('setupFilter'),
-      score: document.getElementById('scoreFilter')
-    };
-
-    function uniqueSectors(){
-      [...new Set(picks.map(p=>p.sector))].sort().forEach(s=>{
-        const opt=document.createElement('option');opt.value=s;opt.textContent=s;els.sector.appendChild(opt);
-      });
-    }
-
-    function scoreClass(v){return v>=80?'high':'mid';}
-    function setupClass(v){return v.startsWith('Pullback')?'pullback':v.startsWith('Breakout')?'breakout':'expansion';}
-
-    function filteredPicks(){
-      const q=els.search.value.trim().toLowerCase();
-      const sector=els.sector.value, cap=els.cap.value, setup=els.setup.value, minScore=Number(els.score.value||0);
-      return picks
-        .filter(p => (sector==='all'||p.sector===sector) && (cap==='all'||p.bucket===cap) && (setup==='all'||p.setup===setup) && p.score>=minScore)
-        .filter(p => !q || [p.name,p.symbol,p.sector,p.bucket,p.setup].join(' ').toLowerCase().includes(q))
-        .sort((a,b)=>b.score-a.score || b.ret3m-a.ret3m);
-    }
-
-    function renderTable(){
-      const data=filteredPicks();
-      els.tableBody.innerHTML=data.map((p,i)=>`<tr>
-        <td class="mono">${i+1}</td>
-        <td><strong>${p.name}</strong><div class="muted small">${p.symbol}</div><div class="small muted" style="margin-top:.45rem">${p.indicator}</div></td>
-        <td>${p.sector}</td>
-        <td>${p.bucket}</td>
-        <td><span class="score ${scoreClass(p.score)} mono">${p.score}</span></td>
-        <td class="mono">₹${p.price}</td>
-        <td class="mono">${p.rsi}</td>
-        <td class="mono">₹${p.ema50} / ₹${p.ema200}</td>
-        <td class="mono">${p.volRatio}x</td>
-        <td class="mono">${p.ret1m}% / ${p.ret3m}% / ${p.ret6m}%</td>
-        <td><span class="pill ${setupClass(p.setup)}">${p.setup}</span></td>
-        <td>${p.buyZone}</td>
-        <td>${p.invalid}</td>
-      </tr>`).join('');
-      document.getElementById('tableStatus').textContent=`${data.length} names`;
-      renderKpis(data);
-      renderCharts(data);
-    }
-
-    function renderKpis(data){
-      const avg=(arr,key)=>arr.length?(arr.reduce((a,b)=>a+Number(b[key]),0)/arr.length):0;
-      document.getElementById('kpiCount').textContent=data.length;
-      document.getElementById('kpiMomentum').textContent=avg(data,'score').toFixed(1);
-      document.getElementById('kpiRsi').textContent=avg(data,'rsi').toFixed(1);
-      document.getElementById('kpiHighConviction').textContent=data.filter(d=>d.score>=80).length;
-    }
-
-    function renderCharts(data){
-      const top=[...data].slice(0,8);
-      const scoreCtx=document.getElementById('scoreChart');
-      const sectorCtx=document.getElementById('sectorChart');
-      if(scoreChart) scoreChart.destroy();
-      if(sectorChart) sectorChart.destroy();
-      scoreChart=new Chart(scoreCtx,{type:'bar',data:{labels:top.map(d=>d.symbol),datasets:[{label:'Momentum score',data:top.map(d=>d.score),backgroundColor:'rgba(79,152,163,.75)',borderRadius:10,order:2},{type:'line',label:'RSI',data:top.map(d=>d.rsi),borderColor:'rgba(253,171,67,.95)',backgroundColor:'rgba(253,171,67,.15)',pointBackgroundColor:'rgba(253,171,67,.95)',pointRadius:3,tension:.35,yAxisID:'y1',order:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getCss('--color-text')}}},scales:{x:{ticks:{color:getCss('--color-text-muted'),maxRotation:0,minRotation:0},grid:{display:false}},y:{beginAtZero:true,max:100,ticks:{color:getCss('--color-text-muted')},grid:{color:'rgba(127,127,127,.12)'}},y1:{position:'right',min:40,max:80,ticks:{color:getCss('--color-text-muted')},grid:{display:false}}}}});
-      const sectorMap=data.reduce((acc,p)=>{acc[p.sector]=(acc[p.sector]||0)+1;return acc;},{});
-      sectorChart=new Chart(sectorCtx,{type:'doughnut',data:{labels:Object.keys(sectorMap),datasets:[{data:Object.values(sectorMap),backgroundColor:['#4f98a3','#fdab43','#6daa45','#a86fdf','#5591c7','#d163a7','#bb653b','#9aa08f'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:getCss('--color-text'),boxWidth:12,padding:16}}}}});
-    }
-
-    function getCss(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
-
-    function clearForm(){['fName','fSymbol','fSector','fPrice','fRsi','fEma50','fEma200','fVol','f1m','f3m','f6m','fScore','fBuy','fInvalid','fThesis','fIndicator'].forEach(id=>document.getElementById(id).value='');document.getElementById('fBucket').value='Large Cap';document.getElementById('fSetup').value='Pullback continuation';}
-
-    document.getElementById('addPickBtn').addEventListener('click',()=>{
-      const obj={
-        rank:picks.length+1,
-        name:document.getElementById('fName').value.trim(),
-        symbol:document.getElementById('fSymbol').value.trim(),
-        sector:document.getElementById('fSector').value.trim(),
-        bucket:document.getElementById('fBucket').value,
-        price:Number(document.getElementById('fPrice').value),
-        rsi:Number(document.getElementById('fRsi').value),
-        ema50:Number(document.getElementById('fEma50').value),
-        ema200:Number(document.getElementById('fEma200').value),
-        volRatio:Number(document.getElementById('fVol').value),
-        ret1m:Number(document.getElementById('f1m').value),
-        ret3m:Number(document.getElementById('f3m').value),
-        ret6m:Number(document.getElementById('f6m').value),
-        setup:document.getElementById('fSetup').value,
-        score:Number(document.getElementById('fScore').value),
-        buyZone:document.getElementById('fBuy').value.trim(),
-        invalid:document.getElementById('fInvalid').value.trim(),
-        thesis:document.getElementById('fThesis').value.trim(),
-        indicator:document.getElementById('fIndicator').value.trim()
-      };
-      if(!obj.name || !obj.symbol || !obj.sector || !obj.price) return alert('Fill stock name, symbol, sector and price.');
-      picks.push(obj);
-      if(![...els.sector.options].some(o=>o.value===obj.sector)){const opt=document.createElement('option');opt.value=obj.sector;opt.textContent=obj.sector;els.sector.appendChild(opt);}
-      clearForm(); renderTable(); location.hash='watchlist';
-    });
-
-    document.getElementById('clearFormBtn').addEventListener('click',clearForm);
-    document.getElementById('prefillBtn').addEventListener('click',()=>{
-      document.getElementById('fName').value='Netweb Technologies';
-      document.getElementById('fSymbol').value='NETWEB';
-      document.getElementById('fSector').value='IT Hardware';
-      document.getElementById('fBucket').value='Mid Cap';
-      document.getElementById('fPrice').value='2680';
-      document.getElementById('fRsi').value='68';
-      document.getElementById('fEma50').value='2520';
-      document.getElementById('fEma200').value='2195';
-      document.getElementById('fVol').value='1.9';
-      document.getElementById('f1m').value='13.5';
-      document.getElementById('f3m').value='29.4';
-      document.getElementById('f6m').value='44.8';
-      document.getElementById('fSetup').value='Momentum expansion';
-      document.getElementById('fScore').value='81';
-      document.getElementById('fBuy').value='₹2,640–2,700 on tight pause';
-      document.getElementById('fInvalid').value='Close below ₹2,495';
-      document.getElementById('fThesis').value='High-beta mid-cap tech leader with strong relative strength. Best traded only if it compresses after thrust and resumes with volume.';
-      document.getElementById('fIndicator').value='Price above aligned 50/200 EMA, RSI strong, leadership versus broader market, but avoid chasing wide expansion bars.';
-    });
-
-    document.getElementById('resetFilters').addEventListener('click',()=>{els.search.value='';els.sector.value='all';els.cap.value='all';els.setup.value='all';els.score.value='70';renderTable();});
-    [els.search,els.sector,els.cap,els.setup,els.score].forEach(el=>{el.addEventListener('input',renderTable);el.addEventListener('change',renderTable);});
-    document.getElementById('downloadJson').addEventListener('click',()=>{
-      const blob=new Blob([JSON.stringify(picks,null,2)],{type:'application/json'});
-      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='momentum-picks.json';a.click();
-    });
-
-    (function(){
-      const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;let d='dark';
-      r.setAttribute('data-theme',d);
-      t.addEventListener('click',()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);t.textContent=d==='dark'?'☾':'☀';renderTable();});t.textContent='☾';
-    })();
-
-    uniqueSectors();
-    renderTable();
-  </script>
-</body>
-</html>
+              <div class="field">abel for="searchBox">Search</label><input id="searchBox" class="input" placeholder="TVS, ports, auto..." /></div>
+              <div class="field">abel for="sectorFilter">Sector</label><select id="sectorFilter
