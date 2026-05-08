@@ -607,19 +607,19 @@ function renderTable(picks) {
         <td class="mono" style="color:${ret3mColor}">${ret3m}</td>
         <td class="mono" style="color:${ret6mColor}">${ret6m}</td>
         <td><span class="pill ${pillClass}">${p.setupType || '—'}</span></td>
-        <td class="mono">${String(p.buyZone ?? '—')}</td>       <!-- ✅ Fix: String() direct render -->
-        <td class="mono" style="color:var(--color-error)">${p.invalidation ? '₹' + String(p.invalidation) : '—'}</td>  <!-- ✅ Fix: String() direct render -->
+        <td class="mono">${p.buyZone != null && p.buyZone !== '' ? String(p.buyZone) : '—'}</td>       <!-- ✅ Fix: String() direct render -->
+        <td class="mono" style="color:var(--color-error)">${p.invalidation != null && p.invalidation !== '' ? '₹' + String(p.invalidation) : '—'}</td>  <!-- ✅ Fix: String() direct render -->
       </tr>
       <tr class="detail-row" id="detail-${i}">
         <td colspan="16">
           <div class="detail-grid">
             <div class="detail-block">
               <strong>🎯 Buy Zone</strong>
-              <p>₹${String(p.buyZone ?? '—')}</p>
+              <p>₹${p.buyZone != null && p.buyZone !== '' ? String(p.buyZone) : '—'}</p>
             </div>
             <div class="detail-block">
               <strong>🛑 Invalidation Level</strong>
-              <p style="color:var(--color-error)">₹${String(p.invalidation ?? '—')}</p>
+              <p style="color:var(--color-error)">₹${p.invalidation != null && p.invalidation !== '' ? String(p.invalidation) : '—' }</p>
             </div>
             <div class="detail-block">
               <strong>📐 Setup Type</strong>
@@ -665,8 +665,8 @@ function applyFilters() {
       (p.name   || '').toLowerCase().includes(search) ||
       (p.sector || '').toLowerCase().includes(search);
     const matchSector = sector === 'all' || p.sector === sector;
-    const matchCap    = cap    === 'all' || (p.bucket || '').startsWith(cap);
-    const matchSetup  = setup  === 'all' || (p.setupType || '') === setup;
+    const matchCap = cap === 'all' || (p.bucket || '').toLowerCase().includes(cap.toLowerCase());
+    const matchSetup = setup === 'all' || (p.setupType || '').toLowerCase().includes(setup.toLowerCase().split(' ')[0]);
     const matchScore  = (p.score || 0) >= minScore;
     return matchSearch && matchSector && matchCap && matchSetup && matchScore;
   });
