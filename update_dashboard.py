@@ -109,27 +109,46 @@ SONAR_JSON_SCHEMA = {
     }
 }
 
-# The screening prompt — tells sonar-pro exactly what to search for
-SCREENING_PROMPT = f"""You are an institutional momentum trader specializing in Indian equities on NSE.
+# The screening prompt — tells sonar-pro exactly what to search for.
+# Keep this aligned with SCREENER_REFERENCE.md.
+SCREENING_PROMPT = f"""You are an institutional momentum trader and quantitative equity screener specializing in Indian equities listed on the NSE.
+
+Your task is to identify NSE-listed stocks that satisfy this trend-following momentum strategy using the latest available market data.
+
+Strategy objective:
+Find fundamentally liquid stocks showing strong bullish trend structure, stable momentum, institutional participation, and continuation potential for 1 to 8 week swing trading opportunities.
 
 Screen for currently LIVE NSE stocks that meet ALL of these criteria:
 
 **TREND STRUCTURE:**
-- Current Price > 50 EMA > 200 EMA (confirmed uptrend)
-- Stock is in a long-term stage-2 uptrend
+- Current price > 50 EMA > 200 EMA
+- Stock is in a confirmed long-term uptrend
 
 **MOMENTUM STABILITY:**
 - RSI(14) between 55 and 75
-- RSI is stable or rising, not sharply declining
-- Avoid stocks with RSI > 78 (overextended)
+- RSI should not be sharply declining in the last 3 to 4 sessions
+- Prefer stocks where RSI is stable or rising
 
 **VOLUME EXPANSION:**
-- Current volume > 1.5x the 30-day average volume
-- Indicates institutional participation
+- Current day volume > 1.5x the 30-day average volume
+- This should indicate institutional participation and accumulation
 
-**PRICE STRUCTURE:**
-- Higher High + Higher Low structure in recent weeks
+**PRICE STRUCTURE CONFIRMATION:**
+- Higher high + higher low structure in recent weeks
 - Avoid choppy, sideways, or weak structures
+
+**MOMENTUM RANKING PREFERENCE:**
+- Prioritize strong 1-month returns
+- Prioritize strong 3-month returns
+- Prioritize strong 6-month relative strength
+- Favor consistent momentum with controlled volatility
+
+**AVOID:**
+- Overextended parabolic moves
+- Low liquidity stocks
+- Weak relative strength
+- Stocks below 50 EMA
+- Falling momentum structures
 
 **WHAT TO RETURN:**
 Return exactly {NUM_PICKS} top candidates as a raw JSON array (no markdown, no explanation, no code blocks).
@@ -138,11 +157,14 @@ Each object must match this schema:
 {json.dumps(SONAR_JSON_SCHEMA, indent=2)}
 
 **FOCUS AREAS FOR TODAY:**
-- Prioritize stocks in sectors showing strongest relative strength: auto, auto ancillaries, capital goods, telecom, IT hardware, marine/port services, metals
+- Prioritize stocks in sectors currently showing the strongest relative strength
 - Include a mix of large-cap, mid-cap, and small-cap names
 - Avoid low-liquidity stocks, penny stocks, and overextended parabolic moves
 - For each stock, provide a specific buy zone (price range for entry), invalidation level (stop-loss zone), and a concise 1-sentence thesis
-- Set the indicator field to a brief technical note (e.g. "RSI stable at 65, EMA50 rising, volume 2.1x avg")
+- Set the indicator field to a brief technical note with RSI trend, EMA stack, volume ratio, and sector or market confirmation
+- Rank the stocks from strongest to weakest momentum continuation setup
+- Classify each setup as Pullback continuation, Breakout continuation, or Momentum expansion
+- While the JSON schema does not include separate market-regime fields, use sector, thesis, and indicator to reflect whether the broader Indian market environment favors momentum continuation, whether breakouts are succeeding or failing, and whether market breadth supports aggressive long setups
 
 **Date Context:** {datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%A, %B %d, %Y")} IST market close.
 Search for the latest NSE price data, RSI, EMA, and volume information from financial websites."""

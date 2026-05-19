@@ -239,10 +239,10 @@ canvas{display:block;max-width:100%}
           <div class="check-inner">
             <h3>✅ Entry Checklist</h3>
             <ul class="check-list">
-              </li>✅ Price above rising 50 EMA and 200 EMA</li>
-              </li>✅ RSI(14) between 55–75, stable or rising</li>
-              </li>✅ Break above pivot or hold above pullback shelf</li>
-              </li>✅ Volume ratio above 1.5× on trigger day</li>
+              <li>✅ Price above rising 50 EMA and 200 EMA</li>
+              <li>✅ RSI(14) between 55–75, stable or rising</li>
+              <li>✅ Break above pivot or hold above pullback shelf</li>
+              <li>✅ Volume ratio above 1.5× on trigger day</li>
             </ul>
           </div>
         </div>
@@ -250,11 +250,11 @@ canvas{display:block;max-width:100%}
           <div class="check-inner">
             <h3>⚠️ Risk Checklist</h3>
             <ul class="check-list">
-              >⚠️ Skip if breakout candle already stretched &gt;5%</li>
-              >⚠️ Avoid if RSI(14) already above 75 at entry </li>
-              >⚠️ Use last contraction low as hard invalidation</li>
-              >⚠️ Favour leaders in strong sectors only</li>
-              >⚠️ Trim if RSI spikes above 78 and curls down</li>
+              <li>⚠️ Skip if breakout candle already stretched &gt;5%</li>
+              <li>⚠️ Avoid if RSI(14) already above 75 at entry</li>
+              <li>⚠️ Use last contraction low as hard invalidation</li>
+              <li>⚠️ Favour leaders in strong sectors only</li>
+              <li>⚠️ Trim if RSI spikes above 78 and curls down</li>
             </ul>
           </div>
         </div>
@@ -269,7 +269,7 @@ canvas{display:block;max-width:100%}
               <span class="chip" id="chartPickCount">0 picks</span>
             </div>
             <div class="chart-wrap">
-              anvas id="scoreChart"></canvas>
+              <canvas id="scoreChart"></canvas>
             </div>
           </div>
         </div>
@@ -280,7 +280,7 @@ canvas{display:block;max-width:100%}
               <span class="chip" id="sectorCount">0 sectors</span>
             </div>
             <div class="chart-wrap">
-              anvas id="sectorChart"></canvas>
+              <canvas id="sectorChart"></canvas>
             </div>
           </div>
         </div>
@@ -297,17 +297,17 @@ canvas{display:block;max-width:100%}
       <!-- Toolbar -->
       <div class="toolbar">
         <div class="field">
-          abel for="searchBox">Search</label>
+          <label for="searchBox">Search</label>
           <input id="searchBox" class="input" placeholder="TVS, auto, ports…" oninput="applyFilters()">
         </div>
         <div class="field">
-          abel for="sectorFilter">Sector</label>
+          <label for="sectorFilter">Sector</label>
           <select id="sectorFilter" class="select" onchange="applyFilters()">
             <option value="all">All sectors</option>
           </select>
         </div>
         <div class="field">
-          abel for="capFilter">Bucket</label>
+          <label for="capFilter">Bucket</label>
           <select id="capFilter" class="select" onchange="applyFilters()">
             <option value="all">All caps</option>
             <option value="Large">Large</option>
@@ -316,7 +316,7 @@ canvas{display:block;max-width:100%}
           </select>
         </div>
         <div class="field">
-          abel for="setupFilter">Setup</label>
+          <label for="setupFilter">Setup</label>
           <select id="setupFilter" class="select" onchange="applyFilters()">
             <option value="all">All setups</option>
             <option value="Pullback Continuation">Pullback</option>
@@ -326,11 +326,11 @@ canvas{display:block;max-width:100%}
           </select>
         </div>
         <div class="field">
-          abel for="scoreFilter">Min Score</label>
+          <label for="scoreFilter">Min Score</label>
           <input id="scoreFilter" class="input" type="number" min="0" max="100" value="0" oninput="applyFilters()">
         </div>
         <div class="field">
-          abel>&nbsp;</label>
+          <label>&nbsp;</label>
           <button class="btn" id="resetFilters" onclick="resetFilters()">Reset</button>
         </div>
       </div>
@@ -573,7 +573,9 @@ function renderTable(picks) {
     const scoreClass = (p.score >= 85) ? 'high' : (p.score >= 75) ? 'mid' : 'low';
 
     // ✅ Fix: fuzzy .includes() instead of strict === matching
-    const setupKey = (p.setupType || '').toLowerCase();
+    const setupLabel = p.setup || p.setupType || '';
+    const invalidLabel = p.invalid || p.invalidation || '';
+    const setupKey = setupLabel.toLowerCase();
     let pillClass = 'breakout';
     if (setupKey.includes('pullback'))  pillClass = 'pullback';
     if (setupKey.includes('expansion')) pillClass = 'expansion';
@@ -592,7 +594,7 @@ function renderTable(picks) {
     const ret6mColor = (p.ret6m || 0) >= 0 ? 'var(--color-success)' : 'var(--color-error)';
 
     return `
-      <tr onclick="toggleDetail('detail-${i}')">
+      <tr class="data-row" onclick="toggleDetail('detail-${i}')">
         <td class="mono">${p.rank || i + 1}</td>
         <td><strong>${p.symbol || '—'}</strong></td>
         <td>${p.name || '—'}</td>
@@ -606,24 +608,24 @@ function renderTable(picks) {
         <td class="mono" style="color:${ret1mColor}">${ret1m}</td>
         <td class="mono" style="color:${ret3mColor}">${ret3m}</td>
         <td class="mono" style="color:${ret6mColor}">${ret6m}</td>
-        <td><span class="pill ${pillClass}">${p.setupType || '—'}</span></td>
+        <td><span class="pill ${pillClass}">${setupLabel || '—'}</span></td>
         <td class="mono">${p.buyZone != null && p.buyZone !== '' ? String(p.buyZone) : '—'}</td>       <!-- ✅ Fix: String() direct render -->
-        <td class="mono" style="color:var(--color-error)">${p.invalidation != null && p.invalidation !== '' ? '₹' + String(p.invalidation) : '—'}</td>  <!-- ✅ Fix: String() direct render -->
+        <td class="mono" style="color:var(--color-error)">${invalidLabel !== '' ? String(invalidLabel) : '—'}</td>  <!-- ✅ Fix: String() direct render -->
       </tr>
       <tr class="detail-row" id="detail-${i}">
         <td colspan="16">
           <div class="detail-grid">
             <div class="detail-block">
               <strong>🎯 Buy Zone</strong>
-              <p>₹${p.buyZone != null && p.buyZone !== '' ? String(p.buyZone) : '—'}</p>
+              <p>${p.buyZone != null && p.buyZone !== '' ? String(p.buyZone) : '—'}</p>
             </div>
             <div class="detail-block">
               <strong>🛑 Invalidation Level</strong>
-              <p style="color:var(--color-error)">₹${p.invalidation != null && p.invalidation !== '' ? String(p.invalidation) : '—' }</p>
+              <p style="color:var(--color-error)">${invalidLabel !== '' ? String(invalidLabel) : '—' }</p>
             </div>
             <div class="detail-block">
               <strong>📐 Setup Type</strong>
-              <p>${p.setupType || '—'}</p>
+              <p>${setupLabel || '—'}</p>
             </div>
             <div class="detail-block" style="grid-column:1/-1">
               <strong>📝 1–8 Week Thesis</strong>
@@ -666,7 +668,7 @@ function applyFilters() {
       (p.sector || '').toLowerCase().includes(search);
     const matchSector = sector === 'all' || p.sector === sector;
     const matchCap = cap === 'all' || (p.bucket || '').toLowerCase().includes(cap.toLowerCase());
-    const matchSetup = setup === 'all' || (p.setupType || '').toLowerCase().includes(setup.toLowerCase().split(' ')[0]);
+    const matchSetup = setup === 'all' || (p.setup || p.setupType || '').toLowerCase().includes(setup.toLowerCase().split(' ')[0]);
     const matchScore  = (p.score || 0) >= minScore;
     return matchSearch && matchSector && matchCap && matchSetup && matchScore;
   });
