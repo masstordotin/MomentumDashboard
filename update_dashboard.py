@@ -33,11 +33,12 @@ PERPLEXITY_API_KEY = os.environ.get("PERPLEXITY_API_KEY", "YOUR_PPLX_API_KEY_HER
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "YOUR_GITHUB_TOKEN_HERE")
 
 # Your GitHub username and repo name (the one serving the dashboard)
-GITHUB_USER = "masstordontin"
+GITHUB_USER = "masstordotin"
 GITHUB_REPO = "MomentumDashboard"
 
-# The branch that GitHub Pages serves from (e.g., 'main' or 'gh-pages')
-GITHUB_BRANCH = "main"
+# The branch that GitHub Pages serves from — must match the repo's actual
+# branch name exactly (git refs are case-sensitive). This repo's branch is "Main".
+GITHUB_BRANCH = "Main"
 
 # The path inside your repo where momentum-picks.json lives
 # If index.html is in a subfolder like 'docs/', put it there too
@@ -333,3 +334,48 @@ def push_to_github(picks: List[Dict[str, Any]]) -> bool:
     except Exception as e:
         logger.error("Failed to push picks to GitHub: %s", e)
         return False
+
+
+# ============================================================
+# 4. Orchestration / Entry Point
+# ============================================================
+
+def run_once() -> bool:
+    """Runs a single screen -> write -> push cycle. Returns True on success."""
+    picks = call_perplexity_api()
+    if not picks:
+        logger.error("No picks returned from Perplexity — skipping this cycle.")
+        return False
+
+    write_local_json(picks, filename=JSON_PATH_IN_REPO)
+
+    if GITHUB_TOKEN == "YOUR_GITHUB_TOKEN_HERE":
+        logger.warning("GITHUB_TOKEN not set — wrote local JSON only, skipped GitHub push.")
+        return True
+
+    return push_to_github(picks)
+
+
+def run_daemon(run_at: str = "08:00", timezone_name: str = "Asia/Kolkata") -> None:
+    """Runs run_once() every day at run_at (local time in timezone_name), forever."""
+    tz = pytz.timezone(timezone_name)
+
+    def job():
+        logger.info("Scheduled run starting at %s", datetime.now(tz).isoformat())
+        run_once()
+
+    schedule.every().day.at(run_at).do(job)
+    logger.info("Daemon started — will run daily at %s %s. Ctrl+C to stop.", run_at, timezone_name)
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+
+
+if __name__ == "__main__":
+    import sys
+    if "--daemon" in sys.argv:
+        run_daemon()
+    else:
+        success = run_once()
+        logger.info("Run finished: %s", "success" if success else "failed")
+        sys.exit(0 if success else 1)

@@ -737,7 +737,9 @@ function applyEditorJSON() {
 // EXPORT
 // ══════════════════════════════════════════
 function exportJSON() {
-    const a = document.createElement('a');
+  const dataToExport = (filteredPicks.length ? filteredPicks : allPicks);
+  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'momentum-picks-' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
