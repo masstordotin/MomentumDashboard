@@ -6,8 +6,22 @@ This folder gives you a fast testing setup for your NSE momentum dashboard.
 
 - `index.html` - your dashboard UI.
 - `momentum-picks.json` - daily data payload from Perplexity or your screener.
+- `portfolio-data.json` - your watchlist, paper trades and real holdings (Portfolio tab).
 - `update_dashboard.py` - refreshes the JSON picks through the Perplexity API and can push updates to GitHub.
+- `refresh_momentum_picks.py` - standard-library alternative that screens directly from NSE/Yahoo data (no Perplexity dependency).
 - `SCREENER_REFERENCE.md` - canonical NSE momentum screener rules for the project.
+
+## Portfolio Tab
+
+The **Portfolio** view has three sub-tabs:
+
+- **Watchlist** - names you're tracking, with added price/date and live change %.
+- **Paper Trading** - a virtual cash account (default ₹10,00,000) for simulated buys/sells, with open positions, closed trades, and realized/unrealized P&L.
+- **Holdings** - your real positions, valuation, P&L and sector allocation.
+
+Current price for any tracked symbol is pulled automatically from `momentum-picks.json` when that symbol appears in today's screen; otherwise you enter a price manually.
+
+All edits happen in your browser only. Click **⬇ Export portfolio-data.json** on the Portfolio page, then commit the downloaded file to the repo the same way you commit `momentum-picks.json`, to persist changes and see them on other devices.
 
 ## Quick Local Workflow
 

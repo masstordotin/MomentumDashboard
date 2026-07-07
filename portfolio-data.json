@@ -1,0 +1,10 @@
+{
+  "updatedAt": null,
+  "paperAccount": {
+    "startingCapital": 1000000,
+    "cashBalance": 1000000
+  },
+  "watchlist": [],
+  "paperTrades": [],
+  "holdings": []
+}

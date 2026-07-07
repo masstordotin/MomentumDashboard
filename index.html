@@ -127,6 +127,12 @@ canvas{display:block;max-width:100%}
 .editor-wrap textarea{width:100%;min-height:400px;padding:var(--space-4);border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-surface-2);color:var(--color-text);font-family:monospace;font-size:.78rem;resize:vertical;line-height:1.6}
 .editor-actions{display:flex;gap:var(--space-3);margin-top:var(--space-4);flex-wrap:wrap}
 .foot-note{margin-top:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted)}
+.sub-tabs{display:flex;gap:var(--space-2);align-items:center;margin-bottom:var(--space-4);flex-wrap:wrap}
+.sub-tab{padding:.6rem 1rem;border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-surface);font-size:var(--text-sm);color:var(--color-text-muted)}
+.sub-tab.active{background:var(--color-primary);color:var(--color-text-inverse);border-color:transparent}
+.btn-xs{padding:.35rem .6rem;font-size:.75rem}
+.section-label{font-size:var(--text-sm);font-weight:700;margin:0 0 var(--space-3)}
+.live-chip{padding:.15rem .4rem;font-size:.65rem;margin-left:.4rem}
 @media(max-width:1200px){.dashboard{grid-template-columns:220px 1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:960px){
   .dashboard{grid-template-columns:64px 1fr}
@@ -165,6 +171,9 @@ canvas{display:block;max-width:100%}
       </button>
       <button class="nav-item" id="nav-editor" onclick="showView('editor')">
         <span>✎</span><span class="nav-text">Edit JSON</span>
+      </button>
+      <button class="nav-item" id="nav-portfolio" onclick="showView('portfolio')">
+        <span>💼</span><span class="nav-text">Portfolio</span>
       </button>
     </div>
     <div class="nav-section">
@@ -388,6 +397,122 @@ canvas{display:block;max-width:100%}
       </div>
     </div>
 
+    <!-- ══ PORTFOLIO ══ -->
+    <div id="view-portfolio" style="display:none">
+      <div class="page-head">
+        <h2>Portfolio Tracker</h2>
+        <p>Watchlist, paper trading and real holdings. Data lives in <code>portfolio-data.json</code> — export and commit it to persist changes across devices.</p>
+      </div>
+
+      <div class="sub-tabs">
+        <button class="sub-tab active" id="subtab-watchlist" onclick="showPortfolioTab('watchlist')">⭐ Watchlist</button>
+        <button class="sub-tab" id="subtab-paper" onclick="showPortfolioTab('paper')">📝 Paper Trading</button>
+        <button class="sub-tab" id="subtab-holdings" onclick="showPortfolioTab('holdings')">💼 Holdings</button>
+        <span style="flex:1"></span>
+        <button class="btn" onclick="exportPortfolioJSON()">⬇ Export portfolio-data.json</button>
+      </div>
+      <p class="foot-note" style="margin-top:-.5rem;margin-bottom:var(--space-4)">Prices marked <span class="chip live-chip">live</span> come from today's momentum-picks.json. Everything else uses the price you entered manually. Changes here are not saved to the repo until you export and commit portfolio-data.json.</p>
+
+      <!-- WATCHLIST SUB-TAB -->
+      <div id="ptab-watchlist">
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card-inner">
+            <div class="toolbar" style="grid-template-columns:1fr 1fr 1.6fr auto;margin-bottom:0">
+              <div class="field"><label for="wlSymbol">Symbol</label><input id="wlSymbol" class="input" placeholder="e.g. TITAN"></div>
+              <div class="field"><label for="wlPrice">Added Price</label><input id="wlPrice" class="input" type="number" step="0.01" placeholder="auto if in picks"></div>
+              <div class="field"><label for="wlNotes">Notes</label><input id="wlNotes" class="input" placeholder="optional"></div>
+              <div class="field"><label>&nbsp;</label><button class="btn primary" onclick="addWatchlistItem()">+ Add to Watchlist</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Symbol</th><th>Name</th><th>Sector</th><th>Added</th><th>Added Price</th><th>Current Price</th><th>Change</th><th>Notes</th><th></th></tr>
+            </thead>
+            <tbody id="watchlistBody"><tr class="empty-row"><td colspan="9">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAPER TRADING SUB-TAB -->
+      <div id="ptab-paper" style="display:none">
+        <div class="grid kpi-grid">
+          <div class="card kpi"><h3>Total Equity</h3><div class="value" id="ptEquity">—</div><div class="sub">Cash + open positions at current price</div></div>
+          <div class="card kpi"><h3>Cash Available</h3><div class="value" id="ptCash">—</div><div class="sub">Unallocated virtual cash</div></div>
+          <div class="card kpi"><h3>Unrealized P&amp;L</h3><div class="value" id="ptUnrealized">—</div><div class="sub">Open positions only</div></div>
+          <div class="card kpi"><h3>Realized P&amp;L</h3><div class="value" id="ptRealized">—</div><div class="sub">From closed trades</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card-inner">
+            <div class="toolbar" style="grid-template-columns:1fr 1fr .8fr auto;margin-bottom:0">
+              <div class="field"><label for="ptSymbol">Symbol</label><input id="ptSymbol" class="input" placeholder="e.g. WELCORP"></div>
+              <div class="field"><label for="ptEntryPrice">Entry Price</label><input id="ptEntryPrice" class="input" type="number" step="0.01" placeholder="auto if in picks"></div>
+              <div class="field"><label for="ptQty">Quantity</label><input id="ptQty" class="input" type="number" step="1" placeholder="e.g. 10"></div>
+              <div class="field"><label>&nbsp;</label><button class="btn primary" onclick="addPaperTrade()">+ New Paper Trade</button></div>
+            </div>
+            <div class="field" style="margin-top:var(--space-3);max-width:260px">
+              <label for="ptStartingCapital">Starting Capital (₹)</label>
+              <input id="ptStartingCapital" class="input" type="number" step="1000" onchange="updateStartingCapital()">
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-label">Open Positions</h3>
+        <div class="table-wrap" style="margin-bottom:var(--space-5)">
+          <table class="data-table">
+            <thead><tr><th>Symbol</th><th>Entry Date</th><th>Entry Price</th><th>Qty</th><th>Current Price</th><th>Unrealized P&amp;L</th><th>Return %</th><th></th></tr></thead>
+            <tbody id="paperOpenBody"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+          </table>
+        </div>
+
+        <h3 class="section-label">Closed Trades <span class="chip" id="ptWinRateChip">Win rate —</span></h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Symbol</th><th>Entry Date</th><th>Exit Date</th><th>Qty</th><th>Entry Price</th><th>Exit Price</th><th>Realized P&amp;L</th><th>Return %</th><th></th></tr></thead>
+            <tbody id="paperClosedBody"><tr class="empty-row"><td colspan="9">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HOLDINGS SUB-TAB -->
+      <div id="ptab-holdings" style="display:none">
+        <div class="grid kpi-grid">
+          <div class="card kpi"><h3>Invested</h3><div class="value" id="hInvested">—</div><div class="sub">Total capital deployed</div></div>
+          <div class="card kpi"><h3>Current Value</h3><div class="value" id="hValue">—</div><div class="sub">At latest known price</div></div>
+          <div class="card kpi"><h3>Unrealized P&amp;L</h3><div class="value" id="hPnl">—</div><div class="sub">Value − invested</div></div>
+          <div class="card kpi"><h3>Holdings</h3><div class="value" id="hCount">—</div><div class="sub">Distinct positions</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card-inner">
+            <div class="toolbar" style="grid-template-columns:1fr .8fr 1fr auto;margin-bottom:0">
+              <div class="field"><label for="hSymbol">Symbol</label><input id="hSymbol" class="input" placeholder="e.g. RELIANCE"></div>
+              <div class="field"><label for="hQty">Quantity</label><input id="hQty" class="input" type="number" step="1"></div>
+              <div class="field"><label for="hBuyPrice">Avg Buy Price</label><input id="hBuyPrice" class="input" type="number" step="0.01"></div>
+              <div class="field"><label>&nbsp;</label><button class="btn primary" onclick="addHolding()">+ Add Holding</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid charts-grid" style="grid-template-columns:2fr 1fr">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Symbol</th><th>Name</th><th>Sector</th><th>Qty</th><th>Avg Buy</th><th>Current</th><th>Invested</th><th>Value</th><th>P&amp;L</th><th></th></tr></thead>
+              <tbody id="holdingsBody"><tr class="empty-row"><td colspan="10">Loading…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header"><h3>🏭 Allocation by Sector</h3></div>
+              <div class="chart-wrap" style="height:260px"><canvas id="holdingsSectorChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -400,6 +525,17 @@ let filteredPicks = [];
 let scoreChartInst = null;
 let sectorChartInst = null;
 let currentView = 'overview';
+
+// Portfolio tracker state (watchlist / paper trading / holdings)
+let portfolioData = {
+  updatedAt: null,
+  paperAccount: { startingCapital: 1000000, cashBalance: 1000000 },
+  watchlist: [],
+  paperTrades: [],
+  holdings: []
+};
+let currentPortfolioTab = 'watchlist';
+let holdingsSectorChartInst = null;
 
 // ══════════════════════════════════════════
 // FETCH WITH CACHE-BUSTING — always fresh
@@ -420,6 +556,7 @@ async function loadData() {
     renderKPIs(allPicks);
     renderCharts(allPicks);
     renderTable(filteredPicks);
+    renderPortfolio();
   } catch (err) {
     setStatus('err', '❌ Load failed');
     document.getElementById('tableBody').innerHTML =
@@ -695,7 +832,7 @@ function resetFilters() {
 // VIEWS
 // ══════════════════════════════════════════
 function showView(view) {
-  ['overview','watchlist','editor'].forEach(v => {
+  ['overview','watchlist','editor','portfolio'].forEach(v => {
     const el = document.getElementById('view-' + v);
     if (el) el.style.display = v === view ? '' : 'none';
     const nav = document.getElementById('nav-' + v);
@@ -703,6 +840,7 @@ function showView(view) {
   });
   currentView = view;
   if (view === 'editor') loadEditorFromCurrent();
+  if (view === 'portfolio') renderPortfolio();
 }
 
 // ══════════════════════════════════════════
@@ -725,12 +863,401 @@ function applyEditorJSON() {
     renderKPIs(allPicks);
     renderCharts(allPicks);
     renderTable(filteredPicks);
+    renderPortfolio();
     setStatus('ok', '✅ Applied — ' + allPicks.length + ' picks');
     document.getElementById('lastUpdated').textContent = 'Edited ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     showView('watchlist');
   } catch (e) {
     alert('❌ Invalid JSON: ' + e.message);
   }
+}
+
+// ══════════════════════════════════════════
+// PORTFOLIO — watchlist / paper trading / holdings
+// ══════════════════════════════════════════
+async function loadPortfolioData() {
+  try {
+    const url = './portfolio-data.json?cb=' + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      portfolioData = {
+        updatedAt: data.updatedAt || null,
+        paperAccount: data.paperAccount || { startingCapital: 1000000, cashBalance: 1000000 },
+        watchlist: Array.isArray(data.watchlist) ? data.watchlist : [],
+        paperTrades: Array.isArray(data.paperTrades) ? data.paperTrades : [],
+        holdings: Array.isArray(data.holdings) ? data.holdings : []
+      };
+    }
+  } catch (err) {
+    console.warn('No existing portfolio-data.json found — starting with an empty portfolio.', err);
+  }
+  renderPortfolio();
+}
+
+function genId() {
+  return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function fmtMoney(n) {
+  if (n == null || isNaN(n)) return '—';
+  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+}
+
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return (n > 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+
+function pnlColor(n) {
+  return (n || 0) >= 0 ? 'var(--color-success)' : 'var(--color-error)';
+}
+
+// Resolves the current price for a symbol: prefers a live match in today's
+// momentum-picks.json, falls back to a manually stored price.
+function resolvePrice(symbol, manualPrice) {
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === (symbol || '').toUpperCase());
+  if (match && match.price != null) return { price: match.price, source: 'live', meta: match };
+  if (manualPrice != null && manualPrice !== '') return { price: Number(manualPrice), source: 'manual', meta: match || null };
+  return { price: null, source: 'none', meta: match || null };
+}
+
+function renderPortfolio() {
+  renderWatchlist();
+  renderPaperTrading();
+  renderHoldings();
+}
+
+function showPortfolioTab(tab) {
+  ['watchlist', 'paper', 'holdings'].forEach(t => {
+    const el = document.getElementById('ptab-' + t);
+    if (el) el.style.display = t === tab ? '' : 'none';
+    const btn = document.getElementById('subtab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  currentPortfolioTab = tab;
+}
+
+function exportPortfolioJSON() {
+  portfolioData.updatedAt = new Date().toISOString();
+  const blob = new Blob([JSON.stringify(portfolioData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio-data.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Watchlist ──
+function addWatchlistItem() {
+  const symbol = (document.getElementById('wlSymbol').value || '').trim().toUpperCase();
+  if (!symbol) { alert('Enter a symbol'); return; }
+  const priceInput = document.getElementById('wlPrice').value;
+  const notes = document.getElementById('wlNotes').value.trim();
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === symbol);
+  const addedPrice = priceInput !== '' ? Number(priceInput) : (match ? match.price : null);
+  if (addedPrice == null) { alert('No price found for ' + symbol + " in today's picks — enter an Added Price manually."); return; }
+
+  portfolioData.watchlist.push({
+    id: genId(),
+    symbol,
+    name: match ? match.name : symbol,
+    sector: match ? match.sector : '—',
+    addedDate: new Date().toISOString().slice(0, 10),
+    addedPrice,
+    manualPrice: match ? null : addedPrice,
+    notes
+  });
+
+  document.getElementById('wlSymbol').value = '';
+  document.getElementById('wlPrice').value = '';
+  document.getElementById('wlNotes').value = '';
+  renderWatchlist();
+}
+
+function removeWatchlistItem(id) {
+  portfolioData.watchlist = portfolioData.watchlist.filter(w => w.id !== id);
+  renderWatchlist();
+}
+
+function renderWatchlist() {
+  const tbody = document.getElementById('watchlistBody');
+  if (!tbody) return;
+  if (portfolioData.watchlist.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="9">Nothing on your watchlist yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = portfolioData.watchlist.map(w => {
+    const resolved = resolvePrice(w.symbol, w.manualPrice);
+    const current = resolved.price;
+    const change = (current != null && w.addedPrice) ? ((current / w.addedPrice - 1) * 100) : null;
+    return `
+      <tr>
+        <td><strong>${w.symbol}</strong></td>
+        <td>${w.name || '—'}</td>
+        <td>${w.sector || '—'}</td>
+        <td class="mono">${w.addedDate}</td>
+        <td class="mono">${fmtMoney(w.addedPrice)}</td>
+        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}</td>
+        <td class="mono" style="color:${pnlColor(change)}">${fmtPct(change)}</td>
+        <td>${w.notes || '—'}</td>
+        <td><button class="btn btn-xs" onclick="removeWatchlistItem('${w.id}')">✕ Remove</button></td>
+      </tr>`;
+  }).join('');
+}
+
+// ── Paper Trading ──
+function updateStartingCapital() {
+  const val = Number(document.getElementById('ptStartingCapital').value || 0);
+  const delta = val - portfolioData.paperAccount.startingCapital;
+  portfolioData.paperAccount.startingCapital = val;
+  portfolioData.paperAccount.cashBalance += delta;
+  renderPaperTrading();
+}
+
+function addPaperTrade() {
+  const symbol = (document.getElementById('ptSymbol').value || '').trim().toUpperCase();
+  const qty = Number(document.getElementById('ptQty').value);
+  const priceInput = document.getElementById('ptEntryPrice').value;
+  if (!symbol || !qty || qty <= 0) { alert('Enter a symbol and a positive quantity'); return; }
+
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === symbol);
+  const entryPrice = priceInput !== '' ? Number(priceInput) : (match ? match.price : null);
+  if (entryPrice == null) { alert('No price found for ' + symbol + ' — enter an Entry Price manually.'); return; }
+
+  const cost = entryPrice * qty;
+  if (cost > portfolioData.paperAccount.cashBalance) {
+    const proceed = confirm(
+      'This trade (' + fmtMoney(cost) + ') exceeds your available cash (' +
+      fmtMoney(portfolioData.paperAccount.cashBalance) + '). Add anyway?'
+    );
+    if (!proceed) return;
+  }
+
+  portfolioData.paperTrades.push({
+    id: genId(),
+    symbol,
+    name: match ? match.name : symbol,
+    qty,
+    entryPrice,
+    entryDate: new Date().toISOString().slice(0, 10),
+    status: 'open',
+    manualPrice: match ? null : entryPrice,
+    exitPrice: null,
+    exitDate: null
+  });
+  portfolioData.paperAccount.cashBalance -= cost;
+
+  ['ptSymbol', 'ptEntryPrice', 'ptQty'].forEach(id => { document.getElementById(id).value = ''; });
+  renderPaperTrading();
+}
+
+function closePaperTrade(id) {
+  const trade = portfolioData.paperTrades.find(t => t.id === id);
+  if (!trade) return;
+  const resolved = resolvePrice(trade.symbol, trade.manualPrice);
+  const defaultExit = resolved.price != null ? resolved.price : trade.entryPrice;
+  const input = prompt('Exit price for ' + trade.symbol + ':', defaultExit);
+  if (input === null) return;
+  const exitPrice = Number(input);
+  if (!exitPrice || exitPrice <= 0) { alert('Invalid exit price'); return; }
+
+  trade.status = 'closed';
+  trade.exitPrice = exitPrice;
+  trade.exitDate = new Date().toISOString().slice(0, 10);
+  portfolioData.paperAccount.cashBalance += exitPrice * trade.qty;
+  renderPaperTrading();
+}
+
+function removePaperTrade(id) {
+  const trade = portfolioData.paperTrades.find(t => t.id === id);
+  if (!trade) return;
+  if (trade.status === 'open') {
+    portfolioData.paperAccount.cashBalance += trade.entryPrice * trade.qty; // refund reserved cash
+  }
+  portfolioData.paperTrades = portfolioData.paperTrades.filter(t => t.id !== id);
+  renderPaperTrading();
+}
+
+function renderPaperTrading() {
+  const capEl = document.getElementById('ptStartingCapital');
+  if (capEl) capEl.value = portfolioData.paperAccount.startingCapital;
+
+  const open = portfolioData.paperTrades.filter(t => t.status === 'open');
+  const closed = portfolioData.paperTrades.filter(t => t.status === 'closed');
+
+  let unrealizedTotal = 0;
+  let openMarketValue = 0;
+  const openRows = open.map(t => {
+    const resolved = resolvePrice(t.symbol, t.manualPrice);
+    const current = resolved.price;
+    const marketPrice = current != null ? current : t.entryPrice;
+    openMarketValue += marketPrice * t.qty;
+    const pnl = current != null ? (current - t.entryPrice) * t.qty : null;
+    const retPct = current != null ? ((current / t.entryPrice - 1) * 100) : null;
+    if (pnl != null) unrealizedTotal += pnl;
+    return `
+      <tr>
+        <td><strong>${t.symbol}</strong></td>
+        <td class="mono">${t.entryDate}</td>
+        <td class="mono">${fmtMoney(t.entryPrice)}</td>
+        <td class="mono">${t.qty}</td>
+        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}</td>
+        <td class="mono" style="color:${pnlColor(pnl)}">${pnl != null ? fmtMoney(pnl) : '—'}</td>
+        <td class="mono" style="color:${pnlColor(retPct)}">${fmtPct(retPct)}</td>
+        <td>
+          <button class="btn btn-xs" onclick="closePaperTrade('${t.id}')">Close</button>
+          <button class="btn btn-xs" onclick="removePaperTrade('${t.id}')">✕</button>
+        </td>
+      </tr>`;
+  }).join('');
+  document.getElementById('paperOpenBody').innerHTML = openRows || '<tr class="empty-row"><td colspan="8">No open paper trades.</td></tr>';
+
+  let realizedTotal = 0;
+  let wins = 0;
+  const closedRows = closed.map(t => {
+    const pnl = (t.exitPrice - t.entryPrice) * t.qty;
+    const retPct = (t.exitPrice / t.entryPrice - 1) * 100;
+    realizedTotal += pnl;
+    if (pnl > 0) wins++;
+    return `
+      <tr>
+        <td><strong>${t.symbol}</strong></td>
+        <td class="mono">${t.entryDate}</td>
+        <td class="mono">${t.exitDate}</td>
+        <td class="mono">${t.qty}</td>
+        <td class="mono">${fmtMoney(t.entryPrice)}</td>
+        <td class="mono">${fmtMoney(t.exitPrice)}</td>
+        <td class="mono" style="color:${pnlColor(pnl)}">${fmtMoney(pnl)}</td>
+        <td class="mono" style="color:${pnlColor(retPct)}">${fmtPct(retPct)}</td>
+        <td><button class="btn btn-xs" onclick="removePaperTrade('${t.id}')">✕</button></td>
+      </tr>`;
+  }).join('');
+  document.getElementById('paperClosedBody').innerHTML = closedRows || '<tr class="empty-row"><td colspan="9">No closed trades yet.</td></tr>';
+
+  const winRateChip = document.getElementById('ptWinRateChip');
+  if (winRateChip) winRateChip.textContent = closed.length ? ('Win rate ' + Math.round((wins / closed.length) * 100) + '%') : 'Win rate —';
+
+  const equity = portfolioData.paperAccount.cashBalance + openMarketValue;
+  document.getElementById('ptEquity').textContent = fmtMoney(equity);
+  document.getElementById('ptCash').textContent = fmtMoney(portfolioData.paperAccount.cashBalance);
+  const unrealEl = document.getElementById('ptUnrealized');
+  unrealEl.textContent = fmtMoney(unrealizedTotal);
+  unrealEl.style.color = pnlColor(unrealizedTotal);
+  const realEl = document.getElementById('ptRealized');
+  realEl.textContent = fmtMoney(realizedTotal);
+  realEl.style.color = pnlColor(realizedTotal);
+}
+
+// ── Holdings ──
+function addHolding() {
+  const symbol = (document.getElementById('hSymbol').value || '').trim().toUpperCase();
+  const qty = Number(document.getElementById('hQty').value);
+  const buyPrice = Number(document.getElementById('hBuyPrice').value);
+  if (!symbol || !qty || qty <= 0 || !buyPrice || buyPrice <= 0) { alert('Enter symbol, quantity and buy price'); return; }
+
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === symbol);
+  portfolioData.holdings.push({
+    id: genId(),
+    symbol,
+    name: match ? match.name : symbol,
+    sector: match ? match.sector : 'Unknown',
+    qty,
+    avgBuyPrice: buyPrice,
+    buyDate: new Date().toISOString().slice(0, 10),
+    manualPrice: match ? null : buyPrice
+  });
+
+  ['hSymbol', 'hQty', 'hBuyPrice'].forEach(id => { document.getElementById(id).value = ''; });
+  renderHoldings();
+}
+
+function removeHolding(id) {
+  portfolioData.holdings = portfolioData.holdings.filter(h => h.id !== id);
+  renderHoldings();
+}
+
+function renderHoldings() {
+  const tbody = document.getElementById('holdingsBody');
+  if (!tbody) return;
+
+  let totalInvested = 0;
+  let totalValue = 0;
+  const sectorMap = {};
+
+  const rows = portfolioData.holdings.map(h => {
+    const resolved = resolvePrice(h.symbol, h.manualPrice);
+    const current = resolved.price != null ? resolved.price : h.avgBuyPrice;
+    const invested = h.avgBuyPrice * h.qty;
+    const value = current * h.qty;
+    const pnl = value - invested;
+    const pnlPct = invested > 0 ? ((value / invested - 1) * 100) : null;
+    totalInvested += invested;
+    totalValue += value;
+    const sectorName = h.sector || 'Unknown';
+    sectorMap[sectorName] = (sectorMap[sectorName] || 0) + value;
+
+    return `
+      <tr>
+        <td><strong>${h.symbol}</strong></td>
+        <td>${h.name || '—'}</td>
+        <td>${h.sector || '—'}</td>
+        <td class="mono">${h.qty}</td>
+        <td class="mono">${fmtMoney(h.avgBuyPrice)}</td>
+        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}</td>
+        <td class="mono">${fmtMoney(invested)}</td>
+        <td class="mono">${fmtMoney(value)}</td>
+        <td class="mono" style="color:${pnlColor(pnl)}">${fmtMoney(pnl)} (${fmtPct(pnlPct)})</td>
+        <td><button class="btn btn-xs" onclick="removeHolding('${h.id}')">✕</button></td>
+      </tr>`;
+  }).join('');
+
+  tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="10">No holdings added yet.</td></tr>';
+
+  document.getElementById('hInvested').textContent = fmtMoney(totalInvested);
+  document.getElementById('hValue').textContent = fmtMoney(totalValue);
+  const pnlEl = document.getElementById('hPnl');
+  pnlEl.textContent = fmtMoney(totalValue - totalInvested);
+  pnlEl.style.color = pnlColor(totalValue - totalInvested);
+  document.getElementById('hCount').textContent = portfolioData.holdings.length;
+
+  renderHoldingsSectorChart(sectorMap);
+}
+
+function renderHoldingsSectorChart(sectorMap) {
+  const ctx = document.getElementById('holdingsSectorChart');
+  if (!ctx) return;
+  if (holdingsSectorChartInst) { holdingsSectorChartInst.destroy(); holdingsSectorChartInst = null; }
+
+  const labels = Object.keys(sectorMap);
+  if (labels.length === 0) return;
+  const values = Object.values(sectorMap);
+  const colors = ['#4f98a3', '#6daa45', '#fdab43', '#5591c7', '#a86fdf', '#d163a7', '#bb653b', '#79b8c8', '#97c96a', '#fdc07a'];
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#979592' : '#7a7974';
+
+  holdingsSectorChartInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors.slice(0, labels.length),
+        borderWidth: 2,
+        borderColor: isDark ? '#1c1b19' : '#f9f8f5'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: textColor, font: { size: 11 }, boxWidth: 12, padding: 10 }
+        }
+      }
+    }
+  });
 }
 
 // ══════════════════════════════════════════
@@ -752,6 +1279,7 @@ function toggleTheme() {
   html.setAttribute('data-theme', next);
   localStorage.setItem('momentum-theme', next);
   renderCharts(filteredPicks.length ? filteredPicks : allPicks);
+  renderHoldings();
 }
 
 function initTheme() {
@@ -761,6 +1289,7 @@ function initTheme() {
 
 initTheme();
 loadData();
+loadPortfolioData();
 </script>
 </body>
 </html>
