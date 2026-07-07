@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T10:51:31.501Z",
+  "updatedAt": "2026-07-07T13:40:28.443Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -52,6 +52,56 @@
       "sector": "Services",
       "addedDate": "2026-07-07",
       "addedPrice": 1848.2,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap32wy3pwq0",
+      "symbol": "GLAND",
+      "name": "Gland Pharma",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-07",
+      "addedPrice": 2550,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap3geg3gpvc",
+      "symbol": "INDUSINDBK",
+      "name": "IndusInd Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 1022.25,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap3qiiw8o2d",
+      "symbol": "CGCL",
+      "name": "Capri Global Capital",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 237.47,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap4547ti1e0",
+      "symbol": "GRANULES",
+      "name": "Granules India",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-07",
+      "addedPrice": 863.55,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap4khygyyjj",
+      "symbol": "PHOENIXLTD",
+      "name": "Phoenix Mills",
+      "sector": "Realty",
+      "addedDate": "2026-07-07",
+      "addedPrice": 2075.1,
       "manualPrice": null,
       "notes": ""
     }
