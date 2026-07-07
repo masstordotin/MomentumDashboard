@@ -1,10 +1,61 @@
 {
-  "updatedAt": null,
+  "updatedAt": "2026-07-07T10:51:31.501Z",
   "paperAccount": {
-    "startingCapital": 1000000,
-    "cashBalance": 1000000
+    "startingCapital": 50000,
+    "cashBalance": 50000
   },
-  "watchlist": [],
+  "watchlist": [
+    {
+      "id": "id_mraj0usd5u5ev",
+      "symbol": "ABDL",
+      "name": "ABDL",
+      "sector": "—",
+      "addedDate": "2026-07-07",
+      "addedPrice": 690,
+      "manualPrice": 690,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj2ylqk7tvq",
+      "symbol": "ADANIENT",
+      "name": "Adani Enterprises",
+      "sector": "Metals & Mining",
+      "addedDate": "2026-07-07",
+      "addedPrice": 3143.6,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj37k8m7dzn",
+      "symbol": "IKS",
+      "name": "Inventurus Knowledge Solutions",
+      "sector": "Information Technology",
+      "addedDate": "2026-07-07",
+      "addedPrice": 1800.2,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj3k6xajrgg",
+      "symbol": "JSWINFRA",
+      "name": "JSW Infrastructure",
+      "sector": "Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 330.45,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj3rf49h8dn",
+      "symbol": "ADANIPORTS",
+      "name": "Adani Ports and Special Economic Zone",
+      "sector": "Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 1848.2,
+      "manualPrice": null,
+      "notes": ""
+    }
+  ],
   "paperTrades": [],
   "holdings": []
 }
