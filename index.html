@@ -411,14 +411,15 @@ canvas{display:block;max-width:100%}
         <span style="flex:1"></span>
         <button class="btn" onclick="exportPortfolioJSON()">⬇ Export portfolio-data.json</button>
       </div>
-      <p class="foot-note" style="margin-top:-.5rem;margin-bottom:var(--space-4)">Prices marked <span class="chip live-chip">live</span> come from today's momentum-picks.json. Everything else uses the price you entered manually. Changes here are not saved to the repo until you export and commit portfolio-data.json.</p>
+      <p class="foot-note" style="margin-top:-.5rem;margin-bottom:var(--space-4)">Prices marked <span class="chip live-chip">live</span> come from today's momentum-picks.json (a ~15-stock momentum screen, not the full market) — everything else is manual. Click <strong>✎ Update</strong> on any row to refresh its price/sector yourself; a small "upd DD Mon" note shows how stale a manual price is. Changes here are not saved to the repo until you export and commit portfolio-data.json.</p>
 
       <!-- WATCHLIST SUB-TAB -->
       <div id="ptab-watchlist">
         <div class="card" style="margin-bottom:var(--space-4)">
           <div class="card-inner">
-            <div class="toolbar" style="grid-template-columns:1fr 1fr 1.6fr auto;margin-bottom:0">
-              <div class="field"><label for="wlSymbol">Symbol</label><input id="wlSymbol" class="input" placeholder="e.g. TITAN"></div>
+            <div class="toolbar" style="grid-template-columns:1fr 1fr 1fr 1.3fr auto;margin-bottom:0">
+              <div class="field"><label for="wlSymbol">Symbol</label><input id="wlSymbol" class="input" placeholder="e.g. TITAN" onblur="autofillSector('wl')"></div>
+              <div class="field"><label for="wlSector">Sector</label><input id="wlSector" class="input" placeholder="auto if in picks"></div>
               <div class="field"><label for="wlPrice">Added Price</label><input id="wlPrice" class="input" type="number" step="0.01" placeholder="auto if in picks"></div>
               <div class="field"><label for="wlNotes">Notes</label><input id="wlNotes" class="input" placeholder="optional"></div>
               <div class="field"><label>&nbsp;</label><button class="btn primary" onclick="addWatchlistItem()">+ Add to Watchlist</button></div>
@@ -487,8 +488,9 @@ canvas{display:block;max-width:100%}
 
         <div class="card" style="margin-bottom:var(--space-4)">
           <div class="card-inner">
-            <div class="toolbar" style="grid-template-columns:1fr .8fr 1fr auto;margin-bottom:0">
-              <div class="field"><label for="hSymbol">Symbol</label><input id="hSymbol" class="input" placeholder="e.g. RELIANCE"></div>
+            <div class="toolbar" style="grid-template-columns:1fr 1fr .8fr 1fr auto;margin-bottom:0">
+              <div class="field"><label for="hSymbol">Symbol</label><input id="hSymbol" class="input" placeholder="e.g. RELIANCE" onblur="autofillSector('h')"></div>
+              <div class="field"><label for="hSector">Sector</label><input id="hSector" class="input" placeholder="auto if in picks"></div>
               <div class="field"><label for="hQty">Quantity</label><input id="hQty" class="input" type="number" step="1"></div>
               <div class="field"><label for="hBuyPrice">Avg Buy Price</label><input id="hBuyPrice" class="input" type="number" step="0.01"></div>
               <div class="field"><label>&nbsp;</label><button class="btn primary" onclick="addHolding()">+ Add Holding</button></div>
@@ -913,6 +915,20 @@ function pnlColor(n) {
   return (n || 0) >= 0 ? 'var(--color-success)' : 'var(--color-error)';
 }
 
+function fmtDateShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+}
+
+// Small muted "upd 08 Jul" note shown under a manually-entered price so it's
+// clear the number isn't live and roughly how stale it might be.
+function staleNote(resolved, updatedAtIso) {
+  if (resolved.source !== 'manual' || !updatedAtIso) return '';
+  return '<div style="font-size:.65rem;color:var(--color-text-muted)">upd ' + fmtDateShort(updatedAtIso) + '</div>';
+}
+
 // Resolves the current price for a symbol: prefers a live match in today's
 // momentum-picks.json, falls back to a manually stored price.
 function resolvePrice(symbol, manualPrice) {
@@ -949,10 +965,24 @@ function exportPortfolioJSON() {
 }
 
 // ── Watchlist ──
+
+// Auto-fills the Sector field when the typed symbol matches today's momentum-picks.json.
+// Only fills if the field is currently empty, so it never clobbers a manual entry.
+function autofillSector(prefix) {
+  const symbolEl = document.getElementById(prefix + 'Symbol');
+  const sectorEl = document.getElementById(prefix + 'Sector');
+  if (!symbolEl || !sectorEl) return;
+  const symbol = (symbolEl.value || '').trim().toUpperCase();
+  if (!symbol) return;
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === symbol);
+  if (match && !sectorEl.value) sectorEl.value = match.sector || '';
+}
+
 function addWatchlistItem() {
   const symbol = (document.getElementById('wlSymbol').value || '').trim().toUpperCase();
   if (!symbol) { alert('Enter a symbol'); return; }
   const priceInput = document.getElementById('wlPrice').value;
+  const sectorInput = document.getElementById('wlSector').value.trim();
   const notes = document.getElementById('wlNotes').value.trim();
   const match = allPicks.find(p => (p.symbol || '').toUpperCase() === symbol);
   const addedPrice = priceInput !== '' ? Number(priceInput) : (match ? match.price : null);
@@ -962,14 +992,16 @@ function addWatchlistItem() {
     id: genId(),
     symbol,
     name: match ? match.name : symbol,
-    sector: match ? match.sector : '—',
+    sector: sectorInput || (match ? match.sector : ''),
     addedDate: new Date().toISOString().slice(0, 10),
     addedPrice,
     manualPrice: match ? null : addedPrice,
+    priceUpdatedAt: match ? null : new Date().toISOString(),
     notes
   });
 
   document.getElementById('wlSymbol').value = '';
+  document.getElementById('wlSector').value = '';
   document.getElementById('wlPrice').value = '';
   document.getElementById('wlNotes').value = '';
   renderWatchlist();
@@ -977,6 +1009,28 @@ function addWatchlistItem() {
 
 function removeWatchlistItem(id) {
   portfolioData.watchlist = portfolioData.watchlist.filter(w => w.id !== id);
+  renderWatchlist();
+}
+
+// Manually refresh a watchlist item's current price and/or sector — needed because
+// most tracked symbols won't appear in today's narrow momentum-picks.json universe,
+// so their price otherwise never moves off the price you added them at.
+function updateWatchlistItem(id) {
+  const w = portfolioData.watchlist.find(x => x.id === id);
+  if (!w) return;
+  const resolved = resolvePrice(w.symbol, w.manualPrice);
+  if (resolved.source === 'live') {
+    alert(w.symbol + ' is in today\'s picks — its price updates automatically (₹' + resolved.price + ').');
+  } else {
+    const priceInput = prompt('Update current price for ' + w.symbol + ':', resolved.price != null ? resolved.price : w.addedPrice);
+    if (priceInput === null) return;
+    const price = Number(priceInput);
+    if (!price || price <= 0) { alert('Invalid price'); return; }
+    w.manualPrice = price;
+    w.priceUpdatedAt = new Date().toISOString();
+  }
+  const sectorInput = prompt('Sector for ' + w.symbol + ' (leave blank to keep "' + (w.sector || 'Unknown') + '"):', w.sector || '');
+  if (sectorInput !== null && sectorInput.trim() !== '') w.sector = sectorInput.trim();
   renderWatchlist();
 }
 
@@ -998,10 +1052,13 @@ function renderWatchlist() {
         <td>${w.sector || '—'}</td>
         <td class="mono">${w.addedDate}</td>
         <td class="mono">${fmtMoney(w.addedPrice)}</td>
-        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}</td>
+        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}${staleNote(resolved, w.priceUpdatedAt)}</td>
         <td class="mono" style="color:${pnlColor(change)}">${fmtPct(change)}</td>
         <td>${w.notes || '—'}</td>
-        <td><button class="btn btn-xs" onclick="removeWatchlistItem('${w.id}')">✕ Remove</button></td>
+        <td>
+          <button class="btn btn-xs" onclick="updateWatchlistItem('${w.id}')">✎ Update</button>
+          <button class="btn btn-xs" onclick="removeWatchlistItem('${w.id}')">✕</button>
+        </td>
       </tr>`;
   }).join('');
 }
@@ -1043,6 +1100,7 @@ function addPaperTrade() {
     entryDate: new Date().toISOString().slice(0, 10),
     status: 'open',
     manualPrice: match ? null : entryPrice,
+    priceUpdatedAt: match ? null : new Date().toISOString(),
     exitPrice: null,
     exitDate: null
   });
@@ -1079,6 +1137,25 @@ function removePaperTrade(id) {
   renderPaperTrading();
 }
 
+// Manually refresh an open paper trade's current price when the symbol isn't in
+// today's picks (same "frozen price" issue as watchlist/holdings).
+function updatePaperTradePrice(id) {
+  const t = portfolioData.paperTrades.find(x => x.id === id);
+  if (!t) return;
+  const resolved = resolvePrice(t.symbol, t.manualPrice);
+  if (resolved.source === 'live') {
+    alert(t.symbol + ' is in today\'s picks — its price updates automatically (₹' + resolved.price + ').');
+    return;
+  }
+  const priceInput = prompt('Update current price for ' + t.symbol + ':', resolved.price != null ? resolved.price : t.entryPrice);
+  if (priceInput === null) return;
+  const price = Number(priceInput);
+  if (!price || price <= 0) { alert('Invalid price'); return; }
+  t.manualPrice = price;
+  t.priceUpdatedAt = new Date().toISOString();
+  renderPaperTrading();
+}
+
 function renderPaperTrading() {
   const capEl = document.getElementById('ptStartingCapital');
   if (capEl) capEl.value = portfolioData.paperAccount.startingCapital;
@@ -1102,10 +1179,11 @@ function renderPaperTrading() {
         <td class="mono">${t.entryDate}</td>
         <td class="mono">${fmtMoney(t.entryPrice)}</td>
         <td class="mono">${t.qty}</td>
-        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}</td>
+        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}${staleNote(resolved, t.priceUpdatedAt)}</td>
         <td class="mono" style="color:${pnlColor(pnl)}">${pnl != null ? fmtMoney(pnl) : '—'}</td>
         <td class="mono" style="color:${pnlColor(retPct)}">${fmtPct(retPct)}</td>
         <td>
+          <button class="btn btn-xs" onclick="updatePaperTradePrice('${t.id}')">✎</button>
           <button class="btn btn-xs" onclick="closePaperTrade('${t.id}')">Close</button>
           <button class="btn btn-xs" onclick="removePaperTrade('${t.id}')">✕</button>
         </td>
@@ -1152,6 +1230,7 @@ function renderPaperTrading() {
 // ── Holdings ──
 function addHolding() {
   const symbol = (document.getElementById('hSymbol').value || '').trim().toUpperCase();
+  const sectorInput = document.getElementById('hSector').value.trim();
   const qty = Number(document.getElementById('hQty').value);
   const buyPrice = Number(document.getElementById('hBuyPrice').value);
   if (!symbol || !qty || qty <= 0 || !buyPrice || buyPrice <= 0) { alert('Enter symbol, quantity and buy price'); return; }
@@ -1161,19 +1240,42 @@ function addHolding() {
     id: genId(),
     symbol,
     name: match ? match.name : symbol,
-    sector: match ? match.sector : 'Unknown',
+    sector: sectorInput || (match ? match.sector : ''),
     qty,
     avgBuyPrice: buyPrice,
     buyDate: new Date().toISOString().slice(0, 10),
-    manualPrice: match ? null : buyPrice
+    manualPrice: match ? null : buyPrice,
+    priceUpdatedAt: match ? null : new Date().toISOString()
   });
 
-  ['hSymbol', 'hQty', 'hBuyPrice'].forEach(id => { document.getElementById(id).value = ''; });
+  ['hSymbol', 'hSector', 'hQty', 'hBuyPrice'].forEach(id => { document.getElementById(id).value = ''; });
   renderHoldings();
 }
 
 function removeHolding(id) {
   portfolioData.holdings = portfolioData.holdings.filter(h => h.id !== id);
+  renderHoldings();
+}
+
+// Manually refresh a holding's current price and/or sector — same rationale as
+// updateWatchlistItem(): without this, a holding's price is frozen at whatever
+// was typed in at add-time unless the symbol happens to be in today's picks.
+function updateHolding(id) {
+  const h = portfolioData.holdings.find(x => x.id === id);
+  if (!h) return;
+  const resolved = resolvePrice(h.symbol, h.manualPrice);
+  if (resolved.source === 'live') {
+    alert(h.symbol + ' is in today\'s picks — its price updates automatically (₹' + resolved.price + ').');
+  } else {
+    const priceInput = prompt('Update current price for ' + h.symbol + ':', resolved.price != null ? resolved.price : h.avgBuyPrice);
+    if (priceInput === null) return;
+    const price = Number(priceInput);
+    if (!price || price <= 0) { alert('Invalid price'); return; }
+    h.manualPrice = price;
+    h.priceUpdatedAt = new Date().toISOString();
+  }
+  const sectorInput = prompt('Sector for ' + h.symbol + ' (leave blank to keep "' + (h.sector || 'Unknown') + '"):', h.sector || '');
+  if (sectorInput !== null && sectorInput.trim() !== '') h.sector = sectorInput.trim();
   renderHoldings();
 }
 
@@ -1204,11 +1306,14 @@ function renderHoldings() {
         <td>${h.sector || '—'}</td>
         <td class="mono">${h.qty}</td>
         <td class="mono">${fmtMoney(h.avgBuyPrice)}</td>
-        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}</td>
+        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}${staleNote(resolved, h.priceUpdatedAt)}</td>
         <td class="mono">${fmtMoney(invested)}</td>
         <td class="mono">${fmtMoney(value)}</td>
         <td class="mono" style="color:${pnlColor(pnl)}">${fmtMoney(pnl)} (${fmtPct(pnlPct)})</td>
-        <td><button class="btn btn-xs" onclick="removeHolding('${h.id}')">✕</button></td>
+        <td>
+          <button class="btn btn-xs" onclick="updateHolding('${h.id}')">✎ Update</button>
+          <button class="btn btn-xs" onclick="removeHolding('${h.id}')">✕</button>
+        </td>
       </tr>`;
   }).join('');
 
