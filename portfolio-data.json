@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T21:49:17.393Z",
+  "updatedAt": "2026-07-08T23:29:03.794Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -12,8 +12,9 @@
       "sector": "—",
       "addedDate": "2026-07-07",
       "addedPrice": 690,
-      "manualPrice": 690,
-      "notes": ""
+      "manualPrice": 674.8,
+      "notes": "",
+      "priceUpdatedAt": "2026-07-08T23:28:41.644Z"
     },
     {
       "id": "id_mraj2ylqk7tvq",
@@ -103,6 +104,83 @@
       "addedDate": "2026-07-07",
       "addedPrice": 2075.1,
       "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpi31xmeor1",
+      "symbol": "J&KBANK",
+      "name": "Jammu & Kashmir Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-08",
+      "addedPrice": 165.96,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpisokrxcku",
+      "symbol": "EXIDEIND",
+      "name": "Exide Industries",
+      "sector": "Automobile and Auto Components",
+      "addedDate": "2026-07-08",
+      "addedPrice": 421.35,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpjde9gk3ad",
+      "symbol": "INDUSINDBK",
+      "name": "IndusInd Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-08",
+      "addedPrice": 994.65,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpkantcpt6a",
+      "symbol": "SONACOMS",
+      "name": "Sona BLW Precision Forgings",
+      "sector": "Automobile and Auto Components",
+      "addedDate": "2026-07-08",
+      "addedPrice": 662.05,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpkm75ds14r",
+      "symbol": "ZYDUSLIFE",
+      "name": "Zydus Lifesciences",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-08",
+      "addedPrice": 1148,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpkz1nnldla",
+      "symbol": "ATHERENERG",
+      "name": "Ather Energy",
+      "sector": "Automobile and Auto Components",
+      "addedDate": "2026-07-08",
+      "addedPrice": 1200,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpl87efipqi",
+      "symbol": "TORNTPHARM",
+      "name": "Torrent Pharmaceuticals",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-08",
+      "addedPrice": 4866.4,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
       "notes": ""
     }
   ],
