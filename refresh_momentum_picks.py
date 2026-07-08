@@ -20,7 +20,9 @@ from urllib.request import Request, urlopen
 
 
 NSE_500_URL = "https://archives.nseindia.com/content/indices/ind_nifty500list.csv"
-YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=1y&interval=1d&events=history"
+# NOTE: deliberately no "events=history" param, and range is a placeholder -
+# see the "freshness" comment above merge_raw_candles() for why.
+YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range={range_}&interval=1d"
 OUTPUT_FILE = "momentum-picks.json"
 NUM_PICKS = 15
 MAX_WORKERS = 12
@@ -38,6 +40,13 @@ def epoch_to_ist_asof(epoch_seconds: float) -> str:
 HEADERS = {
     "User-Agent": "Mozilla/5.0 MomentumDashboard/1.0",
     "Accept": "text/csv,application/json,text/plain,*/*",
+    # Yahoo's long-range chart endpoint (range=1y) appears to sit behind a
+    # more aggressive CDN/edge cache than its short-range endpoint - that's
+    # what was causing the screener to qualify stocks off a session-old
+    # close even after the asOf-labeling fix made the staleness visible.
+    # These headers ask any caching layer in between to not serve a stale hit.
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
 }
 
 
@@ -138,6 +147,71 @@ def clean_candles(raw: Dict[str, Any]) -> Optional[Dict[str, List[float]]]:
         return None
 
     return {"close": closes, "high": highs, "low": lows, "volume": volumes, "timestamp": kept_timestamps}
+
+
+def merge_raw_candles(long_raw: Dict[str, Any], short_raw: Dict[str, Any]) -> Dict[str, Any]:
+    """Yahoo's long-range daily chart endpoint (range=1y) has been observed
+    returning a stale tail - e.g. missing yesterday's already-closed session
+    - even when a short-range request (range=5d) for the exact same symbol
+    and interval already has it. This is the same class of bug already found
+    and fixed in refresh_portfolio_prices.py (which fetches intraday first,
+    then falls back to a short daily range), just showing up here through a
+    different endpoint combination. Rather than trust either fetch alone, we
+    splice in any short-range candle for a trading day the long-range
+    response doesn't already have, so the freshest available close always
+    wins regardless of which endpoint happened to be caching a day behind.
+    """
+
+    def extract(raw: Dict[str, Any]):
+        try:
+            result = raw["chart"]["result"][0]
+            timestamps = result.get("timestamp") or []
+            quote = result["indicators"]["quote"][0]
+            return timestamps, quote
+        except (KeyError, IndexError, TypeError):
+            return [], {}
+
+    long_ts, long_quote = extract(long_raw)
+    short_ts, short_quote = extract(short_raw)
+
+    known_days = {epoch_to_ist_asof(ts)[:10] for ts in long_ts}
+
+    merged_ts = list(long_ts)
+    merged_close = list(long_quote.get("close", []))
+    merged_high = list(long_quote.get("high", []))
+    merged_low = list(long_quote.get("low", []))
+    merged_volume = list(long_quote.get("volume", []))
+
+    for i, ts in enumerate(short_ts):
+        day = epoch_to_ist_asof(ts)[:10]
+        if day in known_days:
+            continue
+        try:
+            merged_ts.append(ts)
+            merged_close.append(short_quote["close"][i])
+            merged_high.append(short_quote["high"][i])
+            merged_low.append(short_quote["low"][i])
+            merged_volume.append(short_quote["volume"][i])
+            known_days.add(day)
+        except (KeyError, IndexError):
+            continue
+
+    # Splicing can leave things out of chronological order - re-sort so
+    # clean_candles()'s downstream "most recent is last" assumption holds.
+    order = sorted(range(len(merged_ts)), key=lambda i: merged_ts[i])
+    return {
+        "chart": {
+            "result": [{
+                "timestamp": [merged_ts[i] for i in order],
+                "indicators": {"quote": [{
+                    "close": [merged_close[i] for i in order],
+                    "high": [merged_high[i] for i in order],
+                    "low": [merged_low[i] for i in order],
+                    "volume": [merged_volume[i] for i in order],
+                }]},
+            }]
+        }
+    }
 
 
 def infer_bucket(symbol: str, rank_index: int) -> str:
@@ -305,7 +379,17 @@ def build_pick(meta: Dict[str, str], metrics: Dict[str, Any]) -> Dict[str, Any]:
 
 def screen_one(meta: Dict[str, str]) -> Optional[Dict[str, Any]]:
     symbol = yahoo_symbol(meta["symbol"])
-    raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol), timeout=20)
+    long_raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol, range_="1y"), timeout=20)
+    # A short-range request is fetched alongside the 1y history request and
+    # merged in - see merge_raw_candles() for why this is necessary (the
+    # long-range endpoint can lag a session or more behind). If this second
+    # call fails for any reason we still proceed on the long-range data alone
+    # rather than dropping the symbol entirely.
+    try:
+        short_raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol, range_="5d"), timeout=20)
+    except Exception:
+        short_raw = {}
+    raw = merge_raw_candles(long_raw, short_raw)
     candles = clean_candles(raw)
     if not candles:
         return None
