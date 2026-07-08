@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T10:50:41.500Z",
+  "updatedAt": "2026-07-08T21:49:17.393Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -159,16 +159,6 @@
       "manualPrice": 133
     },
     {
-      "id": "id_mrbwsh2pq4yyu",
-      "symbol": "PARACABLES",
-      "name": "PARACABLES",
-      "sector": "Unknown",
-      "qty": 2150,
-      "avgBuyPrice": 89,
-      "buyDate": "2026-07-08",
-      "manualPrice": 89
-    },
-    {
       "id": "id_mrbwt9j9mpmo7",
       "symbol": "POWERGRID",
       "name": "POWERGRID",
@@ -227,6 +217,17 @@
       "avgBuyPrice": 3793.84,
       "buyDate": "2026-07-08",
       "manualPrice": 3793.84
+    },
+    {
+      "id": "id_mrcm1iex575zr",
+      "symbol": "PARACABLES",
+      "name": "PARACABLES",
+      "sector": "Electrical Products",
+      "qty": 2150,
+      "avgBuyPrice": 89,
+      "buyDate": "2026-07-08",
+      "manualPrice": 89,
+      "priceUpdatedAt": "2026-07-08T21:49:09.369Z"
     }
   ]
 }
