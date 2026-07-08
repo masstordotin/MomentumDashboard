@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T23:29:03.794Z",
+  "updatedAt": "2026-07-08T23:35:35.889Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -256,12 +256,13 @@
       "id": "id_mrbwu0yaczmy9",
       "symbol": "RAYMONDREL",
       "name": "RAYMONDREL",
-      "sector": "Unknown",
+      "sector": "Real Estate Development",
       "portfolioId": "id_ikshitrawal41157",
       "qty": 100,
       "avgBuyPrice": 489.94,
       "buyDate": "2026-07-08",
-      "manualPrice": 489.94
+      "manualPrice": 665.65,
+      "priceUpdatedAt": "2026-07-08T23:35:30.571Z"
     },
     {
       "id": "id_mrbwukm0au5kc",
