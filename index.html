@@ -991,17 +991,45 @@ function staleNote(resolved, updatedAtIso) {
   return '<div style="font-size:.65rem;color:var(--color-text-muted)">upd ' + fmtDateShort(updatedAtIso) + '</div>';
 }
 
-// Resolves the current price for a symbol, in priority order:
-//   1. "live"   — a match in today's momentum-picks.json (freshest, market-hours updates)
-//   2. "auto"   — portfolio-prices.json, refreshed ~hourly during market hours by GitHub Actions
-//   3. "manual" — whatever price you last entered via ✎ Update / on add
+// Resolves the current price for a symbol, preferring whichever source
+// actually reflects the more recent trading day:
+//   "live"   — a match in momentum-picks.json (the daily screener run)
+//   "auto"   — portfolio-prices.json, refreshed ~hourly during market hours by GitHub Actions
+//   "manual" — whatever price you last entered via ✎ Update / on add
+//
+// IMPORTANT: "live" is NOT unconditionally trusted over "auto" just because
+// it's a screener hit. The screener (momentum-picks.json) and the portfolio
+// price refresh (portfolio-prices.json) run on different, independent
+// schedules, so momentum-picks.json can go a day (or more) stale while
+// portfolio-prices.json has already moved on to a newer close - e.g. a stock
+// scanned Monday can still be sitting in momentum-picks.json on Tuesday with
+// Monday's price, while portfolio-prices.json already has Tuesday's close.
+// We compare each candidate's "asOf" (the real trading-day date the price
+// reflects) and use whichever is genuinely newer. If a candidate has no
+// asOf at all, we can't prove it's fresh, so a dated candidate beats it.
 function resolvePrice(symbol, manualPrice) {
   const upperSymbol = (symbol || '').toUpperCase();
   const match = allPicks.find(p => (p.symbol || '').toUpperCase() === upperSymbol);
-  if (match && match.price != null) return { price: match.price, source: 'live', meta: match };
-
   const auto = portfolioPrices[upperSymbol];
-  if (auto && auto.price != null) return { price: auto.price, source: 'auto', meta: auto };
+
+  const live = (match && match.price != null)
+    ? { price: match.price, source: 'live', meta: match, asOf: match.asOf || null }
+    : null;
+  const autoResolved = (auto && auto.price != null)
+    ? { price: auto.price, source: 'auto', meta: auto, asOf: auto.asOf || null }
+    : null;
+
+  if (live && autoResolved) {
+    // Compare just the calendar-day portion (first 10 chars, "YYYY-MM-DD") so
+    // differing time-of-day/timezone suffixes between the two sources never
+    // cause a same-day price to be wrongly treated as "older".
+    const liveDay = live.asOf ? live.asOf.slice(0, 10) : null;
+    const autoDay = autoResolved.asOf ? autoResolved.asOf.slice(0, 10) : null;
+    if (autoDay && (!liveDay || autoDay >= liveDay)) return autoResolved;
+    return live;
+  }
+  if (live) return live;
+  if (autoResolved) return autoResolved;
 
   if (manualPrice != null && manualPrice !== '') return { price: Number(manualPrice), source: 'manual', meta: match || null };
   return { price: null, source: 'none', meta: match || null };
