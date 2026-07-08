@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T13:40:28.443Z",
+  "updatedAt": "2026-07-08T10:50:41.500Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -107,5 +107,126 @@
     }
   ],
   "paperTrades": [],
-  "holdings": []
+  "holdings": [
+    {
+      "id": "id_mrbwnpl2nmry3",
+      "symbol": "ADANIPORTS",
+      "name": "ADANIPORTS",
+      "sector": "Unknown",
+      "qty": 3,
+      "avgBuyPrice": 1518.917,
+      "buyDate": "2026-07-08",
+      "manualPrice": 1518.917
+    },
+    {
+      "id": "id_mrbwp50qxh90q",
+      "symbol": "BELRISE",
+      "name": "BELRISE",
+      "sector": "Unknown",
+      "qty": 850,
+      "avgBuyPrice": 118.308,
+      "buyDate": "2026-07-08",
+      "manualPrice": 118.308
+    },
+    {
+      "id": "id_mrbwq77ic57xi",
+      "symbol": "ITC",
+      "name": "ITC",
+      "sector": "Unknown",
+      "qty": 10,
+      "avgBuyPrice": 429,
+      "buyDate": "2026-07-08",
+      "manualPrice": 429
+    },
+    {
+      "id": "id_mrbwqwpemmqoq",
+      "symbol": "JPPOWER",
+      "name": "JPPOWER",
+      "sector": "Unknown",
+      "qty": 4000,
+      "avgBuyPrice": 18.959,
+      "buyDate": "2026-07-08",
+      "manualPrice": 18.959
+    },
+    {
+      "id": "id_mrbwrld8f1k61",
+      "symbol": "NBCC",
+      "name": "NBCC",
+      "sector": "Unknown",
+      "qty": 375,
+      "avgBuyPrice": 133,
+      "buyDate": "2026-07-08",
+      "manualPrice": 133
+    },
+    {
+      "id": "id_mrbwsh2pq4yyu",
+      "symbol": "PARACABLES",
+      "name": "PARACABLES",
+      "sector": "Unknown",
+      "qty": 2150,
+      "avgBuyPrice": 89,
+      "buyDate": "2026-07-08",
+      "manualPrice": 89
+    },
+    {
+      "id": "id_mrbwt9j9mpmo7",
+      "symbol": "POWERGRID",
+      "name": "POWERGRID",
+      "sector": "Unknown",
+      "qty": 15,
+      "avgBuyPrice": 332,
+      "buyDate": "2026-07-08",
+      "manualPrice": 332
+    },
+    {
+      "id": "id_mrbwu0yaczmy9",
+      "symbol": "RAYMONDREL",
+      "name": "RAYMONDREL",
+      "sector": "Unknown",
+      "qty": 100,
+      "avgBuyPrice": 489.94,
+      "buyDate": "2026-07-08",
+      "manualPrice": 489.94
+    },
+    {
+      "id": "id_mrbwukm0au5kc",
+      "symbol": "SAMMAANCAP",
+      "name": "SAMMAANCAP",
+      "sector": "Unknown",
+      "qty": 260,
+      "avgBuyPrice": 136.5,
+      "buyDate": "2026-07-08",
+      "manualPrice": 136.5
+    },
+    {
+      "id": "id_mrbwv4j4loo1y",
+      "symbol": "SUNPHARMA",
+      "name": "SUNPHARMA",
+      "sector": "Unknown",
+      "qty": 10,
+      "avgBuyPrice": 1735.934,
+      "buyDate": "2026-07-08",
+      "manualPrice": 1735.934
+    },
+    {
+      "id": "id_mrbww59wgh8je",
+      "symbol": "TATACAP",
+      "name": "TATACAP",
+      "sector": "Unknown",
+      "qty": 46,
+      "avgBuyPrice": 326,
+      "buyDate": "2026-07-08",
+      "manualPrice": 326
+    },
+    {
+      "id": "id_mrbwyk07qmfxe",
+      "symbol": "TCS",
+      "name": "TCS",
+      "sector": "Unknown",
+      "qty": 23,
+      "avgBuyPrice": 3793.84,
+      "buyDate": "2026-07-08",
+      "manualPrice": 3793.84
+    }
+  ]
 }
