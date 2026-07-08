@@ -12,7 +12,7 @@ import math
 import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from io import StringIO
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
@@ -24,6 +24,15 @@ YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?ra
 OUTPUT_FILE = "momentum-picks.json"
 NUM_PICKS = 15
 MAX_WORKERS = 12
+
+# NSE trades in India Standard Time; "asOf" is anchored to IST midnight so the
+# label can't drift by a calendar day depending on the viewer's timezone.
+IST_OFFSET = timedelta(hours=5, minutes=30)
+
+
+def epoch_to_ist_asof(epoch_seconds: float) -> str:
+    ist_date = (datetime.fromtimestamp(epoch_seconds, tz=timezone.utc) + IST_OFFSET).date()
+    return f"{ist_date.isoformat()}T00:00:00+05:30"
 
 
 HEADERS = {
@@ -97,6 +106,7 @@ def pct_return(values: List[float], sessions: int) -> Optional[float]:
 def clean_candles(raw: Dict[str, Any]) -> Optional[Dict[str, List[float]]]:
     try:
         result = raw["chart"]["result"][0]
+        timestamps = result.get("timestamp") or []
         quote_data = result["indicators"]["quote"][0]
     except (KeyError, IndexError, TypeError):
         return None
@@ -105,8 +115,10 @@ def clean_candles(raw: Dict[str, Any]) -> Optional[Dict[str, List[float]]]:
     highs: List[float] = []
     lows: List[float] = []
     volumes: List[float] = []
+    kept_timestamps: List[float] = []
 
-    for close, high, low, volume in zip(
+    for ts, close, high, low, volume in zip(
+        timestamps,
         quote_data.get("close", []),
         quote_data.get("high", []),
         quote_data.get("low", []),
@@ -120,11 +132,12 @@ def clean_candles(raw: Dict[str, Any]) -> Optional[Dict[str, List[float]]]:
         highs.append(float(high))
         lows.append(float(low))
         volumes.append(float(volume))
+        kept_timestamps.append(ts)
 
     if len(closes) < 210:
         return None
 
-    return {"close": closes, "high": highs, "low": lows, "volume": volumes}
+    return {"close": closes, "high": highs, "low": lows, "volume": volumes, "timestamp": kept_timestamps}
 
 
 def infer_bucket(symbol: str, rank_index: int) -> str:
@@ -213,6 +226,9 @@ def qualifies(candles: Dict[str, List[float]]) -> Optional[Dict[str, Any]]:
     if price / ema50 > 1.22 or ret1m > 35:
         return None
 
+    timestamps = candles.get("timestamp") or []
+    as_of = epoch_to_ist_asof(timestamps[-1]) if timestamps else None
+
     return {
         "price": price,
         "rsi": current_rsi,
@@ -226,6 +242,7 @@ def qualifies(candles: Dict[str, List[float]]) -> Optional[Dict[str, Any]]:
         "higherLow": higher_low,
         "volatility": volatility,
         "setup": setup_type(price, high, ema50, vol_ratio, ret1m),
+        "asOf": as_of,
     }
 
 
@@ -272,6 +289,7 @@ def build_pick(meta: Dict[str, str], metrics: Dict[str, Any]) -> Dict[str, Any]:
         "ret3m": round(metrics["ret3m"], 1),
         "ret6m": round(metrics["ret6m"], 1),
         "setup": metrics["setup"],
+        "asOf": metrics.get("asOf"),
         "buyZone": f"Rs {buy_low:.0f} - Rs {buy_high:.0f} near trigger/base hold",
         "invalid": f"Daily close below Rs {invalid:.0f}",
         "thesis": (

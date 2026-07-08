@@ -202,6 +202,7 @@ canvas{display:block;max-width:100%}
   <header class="header">
     <div class="topbar">
       <span class="chip">📊 NSE / NIFTY500</span>
+      <span class="chip" id="dataAsOf" style="display:none" title="The trading day this data's prices actually reflect">—</span>
       <span class="last-updated" id="lastUpdated">—</span>
       <span class="status-pill loading" id="statusPill">⏳ Loading…</span>
     </div>
@@ -555,7 +556,8 @@ async function loadData() {
     allPicks = data;
     filteredPicks = [...allPicks];
     setStatus('ok', '✅ Live — ' + allPicks.length + ' picks');
-    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('lastUpdated').textContent = 'Fetched ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    updateDataAsOfLabel(allPicks);
     populateSectorFilter();
     renderKPIs(allPicks);
     renderCharts(allPicks);
@@ -584,6 +586,25 @@ function setStatus(type, text) {
   const el = document.getElementById('statusPill');
   el.className = 'status-pill ' + type;
   el.textContent = text;
+}
+
+// Shows the actual trading-day the picks' prices reflect (from each pick's
+// "asOf" field), separate from "Updated HH:MM" which is just the fetch time.
+// Without this, "Updated 01:20 AM" looks fresh even when the underlying
+// prices are from a prior session that hasn't been refreshed yet.
+function updateDataAsOfLabel(picks) {
+  const el = document.getElementById('dataAsOf');
+  if (!el) return;
+  const dates = (picks || []).map(p => p.asOf).filter(Boolean);
+  if (dates.length === 0) {
+    el.style.display = 'none';
+    return;
+  }
+  const counts = {};
+  dates.forEach(d => { counts[d] = (counts[d] || 0) + 1; });
+  const mostCommon = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  el.style.display = '';
+  el.textContent = '📅 Data as of ' + fmtDateShort(mostCommon);
 }
 
 // ══════════════════════════════════════════
@@ -870,6 +891,7 @@ function applyEditorJSON() {
     renderPortfolio();
     setStatus('ok', '✅ Applied — ' + allPicks.length + ' picks');
     document.getElementById('lastUpdated').textContent = 'Edited ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    updateDataAsOfLabel(allPicks);
     showView('watchlist');
   } catch (e) {
     alert('❌ Invalid JSON: ' + e.message);
@@ -956,7 +978,10 @@ function fmtDateShort(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  // Pinned to Asia/Kolkata explicitly - NSE trades in IST, and without this the
+  // displayed date would otherwise follow the viewer's own browser timezone,
+  // which can silently shift a date-only value by a calendar day.
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', timeZone: 'Asia/Kolkata' });
 }
 
 // Small muted "upd 08 Jul" note shown under a manually-entered price so it's

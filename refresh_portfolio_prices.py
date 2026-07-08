@@ -19,14 +19,19 @@ a one-off refresh.
 """
 
 import json
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 PORTFOLIO_FILE = "portfolio-data.json"
 OUTPUT_FILE = "portfolio-prices.json"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range={range_}&interval={interval}"
+
+# NSE trades in India Standard Time; every "asOf" date we stamp is anchored to
+# IST midnight (not left as a bare UTC-parsed date) so the label can't drift
+# by a calendar day depending on the viewer's browser timezone.
+IST_OFFSET = timedelta(hours=5, minutes=30)
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 MomentumDashboard/1.0",
@@ -44,34 +49,46 @@ def yahoo_symbol(nse_symbol: str) -> str:
     return quote(f"{nse_symbol}.NS", safe="")
 
 
-def latest_close(raw: Dict[str, Any]) -> Optional[float]:
+def epoch_to_ist_asof(epoch_seconds: float) -> str:
+    ist_date = (datetime.fromtimestamp(epoch_seconds, tz=timezone.utc) + IST_OFFSET).date()
+    return f"{ist_date.isoformat()}T00:00:00+05:30"
+
+
+def latest_close_with_date(raw: Dict[str, Any]) -> Tuple[Optional[float], Optional[str]]:
+    """Returns (price, asOf) for the most recent non-null close, where asOf is
+    the actual trading-day date of that candle (from Yahoo's own timestamp) -
+    NOT the time this script happened to run. Getting this wrong is exactly
+    what caused prices to be mislabeled with the wrong date previously."""
     try:
         result = raw["chart"]["result"][0]
+        timestamps = result.get("timestamp") or []
         closes = result["indicators"]["quote"][0].get("close", [])
     except (KeyError, IndexError, TypeError):
-        return None
-    for value in reversed(closes):
+        return None, None
+    for ts, value in zip(reversed(timestamps), reversed(closes)):
         if value is not None:
-            return round(float(value), 2)
-    return None
+            return round(float(value), 2), epoch_to_ist_asof(ts)
+    return None, None
 
 
-def fetch_current_price(symbol: str) -> Optional[float]:
-    """Tries today's intraday bars first (freshest during market hours),
-    falls back to the most recent daily close (weekends/holidays/pre-open)."""
+def fetch_current_price(symbol: str) -> Tuple[Optional[float], Optional[str]]:
+    """Tries recent intraday bars first (freshest during market hours),
+    falls back to the most recent daily close (weekends/holidays/pre-open).
+    Returns (price, asOf) - asOf reflects the real date of whichever candle
+    was actually used, however far back that ends up being."""
     symbol_q = yahoo_symbol(symbol)
     try:
-        raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol_q, range_="1d", interval="5m"))
-        price = latest_close(raw)
+        raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol_q, range_="5d", interval="15m"))
+        price, as_of = latest_close_with_date(raw)
         if price is not None:
-            return price
+            return price, as_of
     except Exception:
         pass
     try:
-        raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol_q, range_="5d", interval="1d"))
-        return latest_close(raw)
+        raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol_q, range_="10d", interval="1d"))
+        return latest_close_with_date(raw)
     except Exception:
-        return None
+        return None, None
 
 
 def collect_tracked_symbols(portfolio: Dict[str, Any]) -> List[str]:
@@ -108,9 +125,12 @@ def main() -> None:
     now_iso = datetime.now(timezone.utc).isoformat()
 
     for symbol in symbols:
-        price = fetch_current_price(symbol)
+        price, as_of = fetch_current_price(symbol)
         if price is not None:
-            prices[symbol] = {"price": price, "asOf": now_iso}
+            # as_of is the real trading-day date of the candle used; now_iso
+            # (script run time) is only a last-resort fallback if Yahoo's
+            # response didn't include a usable timestamp.
+            prices[symbol] = {"price": price, "asOf": as_of or now_iso}
         else:
             print(f"skip {symbol}: no price data available")
 

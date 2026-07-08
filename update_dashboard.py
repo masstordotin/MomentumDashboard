@@ -98,13 +98,14 @@ SONAR_JSON_SCHEMA = {
             "buyZone": {"type": "string"},
             "invalid": {"type": "string"},
             "thesis": {"type": "string"},
-            "indicator": {"type": "string"}
+            "indicator": {"type": "string"},
+            "asOf": {"type": "string"}
         },
         "required": [
             "rank", "name", "symbol", "sector", "bucket", "score",
             "price", "rsi", "ema50", "ema200", "volRatio",
             "ret1m", "ret3m", "ret6m", "setup", "buyZone",
-            "invalid", "thesis", "indicator"
+            "invalid", "thesis", "indicator", "asOf"
         ],
         "additionalProperties": False
     }
@@ -166,8 +167,9 @@ Each object must match this schema:
 - Rank the stocks from strongest to weakest momentum continuation setup
 - Classify each setup as Pullback continuation, Breakout continuation, or Momentum expansion
 - While the JSON schema does not include separate market-regime fields, use sector, thesis, and indicator to reflect whether the broader Indian market environment favors momentum continuation, whether breakouts are succeeding or failing, and whether market breadth supports aggressive long setups
+- Set the "asOf" field to the exact trading-day date that the price, RSI, EMA, and volume figures actually reflect (the date of the underlying candle/quote you found, NOT necessarily today), formatted exactly as "YYYY-MM-DDT00:00:00+05:30" (IST midnight for that date). If your source data is from the prior trading session (e.g. markets haven't closed yet, or your search tool returned slightly stale quotes), asOf must reflect that earlier date, not today's date — do not default to today just because that's when this request was made.
 
-**Date Context:** {datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%A, %B %d, %Y")} IST market close.
+**Date Context:** {datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%A, %B %d, %Y")} IST market close. This is when the request is being made — it is NOT automatically the asOf date; only use it as asOf if your actual price data is confirmed current as of this session's close.
 Search for the latest NSE price data, RSI, EMA, and volume information from financial websites."""
 
 

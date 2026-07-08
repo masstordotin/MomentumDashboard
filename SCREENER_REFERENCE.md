@@ -105,5 +105,8 @@ When updating `momentum-picks.json`, keep the dashboard-compatible fields:
 - `invalid`
 - `thesis`
 - `indicator`
+- `asOf`
 
 Use `thesis` for the short qualification explanation and `indicator` for compact technical evidence such as RSI trend, EMA stack, volume ratio, and market or sector confirmation.
+
+`asOf` is the real trading-day date the pick's price/RSI/EMA/volume figures reflect (format: `YYYY-MM-DDT00:00:00+05:30`, IST midnight) — not the time the screen was run. This is distinct from the dashboard's "Fetched HH:MM" label, which only shows when the JSON was last downloaded by the browser. `refresh_momentum_picks.py` derives `asOf` from the actual last candle timestamp returned by Yahoo Finance; the Perplexity path (`update_dashboard.py`) asks the model to report the true date of its underlying quote rather than defaulting to "today." The dashboard header's "📅 Data as of" chip reads this field directly, so it must always reflect the real data date to avoid the picks looking fresher than they are.
