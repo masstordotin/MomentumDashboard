@@ -7,6 +7,7 @@ local/GitHub Pages workflow without dependency setup.
 """
 
 import csv
+import http.cookiejar
 import json
 import math
 import statistics
@@ -16,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 from io import StringIO
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
-from urllib.request import Request, urlopen
+from urllib.request import Request, urlopen, build_opener, HTTPCookieProcessor
 
 
 NSE_500_URL = "https://archives.nseindia.com/content/indices/ind_nifty500list.csv"
@@ -26,6 +27,28 @@ YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?ra
 OUTPUT_FILE = "momentum-picks.json"
 NUM_PICKS = 15
 MAX_WORKERS = 12
+
+# NSE's own end-of-day settlement file (bhavcopy) - the actual source of
+# truth for a session's close, published directly by the exchange rather
+# than aggregated/cached by a third party like Yahoo. Used to override the
+# freshest day of the Yahoo-derived series (see fetch_bhavcopy() below).
+NSE_BASE_URL = "https://www.nseindia.com"
+NSE_ARCHIVE_BASE_URL = "https://nsearchives.nseindia.com"
+NSE_LEGACY_ARCHIVE_BASE_URL = "https://archives.nseindia.com"
+SECURITY_BHAVCOPY_PATH_TEMPLATE = "/products/content/sec_bhavdata_full_{date}.csv"
+# NSE fronts its data endpoints with bot detection that rejects requests
+# lacking cookies from a prior "normal" page visit. Walking these paths
+# first (discarding their bodies, keeping only the cookies) makes the
+# bhavcopy request below look like it came from a browser that actually
+# browsed the site, rather than a bare script.
+NSE_WARM_UP_PATHS = (
+    "/get-quotes-equity-historical-data",
+    "/get-quotes/equity?symbol=RELIANCE",
+    "/market-data/live-market-indices",
+    "/products-services/indices-nifty500-index",
+    "/market-data/live-equity-market?symbol=NIFTY%20500",
+    "/",
+)
 
 # NSE trades in India Standard Time; "asOf" is anchored to IST midnight so the
 # label can't drift by a calendar day depending on the viewer's timezone.
@@ -47,6 +70,19 @@ HEADERS = {
     # These headers ask any caching layer in between to not serve a stale hit.
     "Cache-Control": "no-cache",
     "Pragma": "no-cache",
+}
+
+# NSE's site is picky about looking like a real browser (User-Agent alone
+# isn't enough - full browser-shaped headers matter for getting past its
+# bot detection during warm-up and the bhavcopy fetch itself).
+NSE_BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Connection": "keep-alive",
 }
 
 
@@ -149,17 +185,23 @@ def clean_candles(raw: Dict[str, Any]) -> Optional[Dict[str, List[float]]]:
     return {"close": closes, "high": highs, "low": lows, "volume": volumes, "timestamp": kept_timestamps}
 
 
-def merge_raw_candles(long_raw: Dict[str, Any], short_raw: Dict[str, Any]) -> Dict[str, Any]:
-    """Yahoo's long-range daily chart endpoint (range=1y) has been observed
-    returning a stale tail - e.g. missing yesterday's already-closed session
-    - even when a short-range request (range=5d) for the exact same symbol
-    and interval already has it. This is the same class of bug already found
-    and fixed in refresh_portfolio_prices.py (which fetches intraday first,
-    then falls back to a short daily range), just showing up here through a
-    different endpoint combination. Rather than trust either fetch alone, we
-    splice in any short-range candle for a trading day the long-range
-    response doesn't already have, so the freshest available close always
-    wins regardless of which endpoint happened to be caching a day behind.
+def merge_raw_candles(base_raw: Dict[str, Any], overlay_raw: Dict[str, Any], override: bool = False) -> Dict[str, Any]:
+    """Combines two Yahoo-chart-shaped raw responses into one, keyed by
+    calendar day (IST) so overlapping/duplicate trading days can't sneak in.
+
+    override=False (the default): a day from `overlay_raw` is only added if
+    `base_raw` doesn't already have it. This is what fixed the original
+    staleness bug - Yahoo's long-range daily chart endpoint (range=1y) has
+    been observed returning a stale tail (e.g. missing yesterday's already-
+    closed session) even when a short-range request (range=5d) for the exact
+    same symbol/interval already has it. Both sides are the same underlying
+    source, so we only ever expect to fill gaps, not disagreements.
+
+    override=True: a day from `overlay_raw` REPLACES base's version of that
+    day, in addition to filling gaps. Used when `overlay_raw` comes from NSE's
+    own bhavcopy - the exchange's official settlement file, and explicitly
+    the more authoritative source when it disagrees with a third-party
+    aggregator like Yahoo for the same day.
     """
 
     def extract(raw: Dict[str, Any]):
@@ -171,33 +213,59 @@ def merge_raw_candles(long_raw: Dict[str, Any], short_raw: Dict[str, Any]) -> Di
         except (KeyError, IndexError, TypeError):
             return [], {}
 
-    long_ts, long_quote = extract(long_raw)
-    short_ts, short_quote = extract(short_raw)
+    base_ts, base_quote = extract(base_raw)
+    overlay_ts, overlay_quote = extract(overlay_raw)
 
-    known_days = {epoch_to_ist_asof(ts)[:10] for ts in long_ts}
+    day_index: Dict[str, int] = {}
+    merged_ts: List[float] = []
+    merged_close: List[float] = []
+    merged_high: List[float] = []
+    merged_low: List[float] = []
+    merged_volume: List[float] = []
 
-    merged_ts = list(long_ts)
-    merged_close = list(long_quote.get("close", []))
-    merged_high = list(long_quote.get("high", []))
-    merged_low = list(long_quote.get("low", []))
-    merged_volume = list(long_quote.get("volume", []))
+    def add_or_replace(day: str, ts, close, high, low, volume, allow_replace: bool) -> None:
+        if day in day_index:
+            if allow_replace:
+                idx = day_index[day]
+                merged_ts[idx] = ts
+                merged_close[idx] = close
+                merged_high[idx] = high
+                merged_low[idx] = low
+                merged_volume[idx] = volume
+            return
+        day_index[day] = len(merged_ts)
+        merged_ts.append(ts)
+        merged_close.append(close)
+        merged_high.append(high)
+        merged_low.append(low)
+        merged_volume.append(volume)
 
-    for i, ts in enumerate(short_ts):
-        day = epoch_to_ist_asof(ts)[:10]
-        if day in known_days:
-            continue
+    for ts, close, high, low, volume in zip(
+        base_ts,
+        base_quote.get("close", []),
+        base_quote.get("high", []),
+        base_quote.get("low", []),
+        base_quote.get("volume", []),
+    ):
+        add_or_replace(epoch_to_ist_asof(ts)[:10], ts, close, high, low, volume, allow_replace=False)
+
+    for i, ts in enumerate(overlay_ts):
         try:
-            merged_ts.append(ts)
-            merged_close.append(short_quote["close"][i])
-            merged_high.append(short_quote["high"][i])
-            merged_low.append(short_quote["low"][i])
-            merged_volume.append(short_quote["volume"][i])
-            known_days.add(day)
+            add_or_replace(
+                epoch_to_ist_asof(ts)[:10],
+                ts,
+                overlay_quote["close"][i],
+                overlay_quote["high"][i],
+                overlay_quote["low"][i],
+                overlay_quote["volume"][i],
+                allow_replace=override,
+            )
         except (KeyError, IndexError):
             continue
 
-    # Splicing can leave things out of chronological order - re-sort so
-    # clean_candles()'s downstream "most recent is last" assumption holds.
+    # Splicing/replacing can leave things out of chronological order -
+    # re-sort so clean_candles()'s downstream "most recent is last"
+    # assumption holds.
     order = sorted(range(len(merged_ts)), key=lambda i: merged_ts[i])
     return {
         "chart": {
@@ -212,6 +280,140 @@ def merge_raw_candles(long_raw: Dict[str, Any], short_raw: Dict[str, Any]) -> Di
             }]
         }
     }
+
+
+def _bhav_row_to_raw(bhav_row: Dict[str, Any]) -> Dict[str, Any]:
+    """Wraps a single bhavcopy row ({close, high, low, volume, asOf}) in the
+    same Yahoo-chart-shaped structure merge_raw_candles() expects, so the two
+    sources can be combined with the exact same merge logic. The synthetic
+    timestamp is set to 09:15 IST (NSE's market-open time) on the bhavcopy's
+    date - matching the convention Yahoo's own daily bars use - purely so
+    day-bucketing and chronological sorting behave consistently."""
+    day = datetime.strptime(bhav_row["asOf"][:10], "%Y-%m-%d")
+    market_open_ist = day.replace(hour=9, minute=15)
+    epoch = int((market_open_ist - IST_OFFSET).replace(tzinfo=timezone.utc).timestamp())
+    return {
+        "chart": {
+            "result": [{
+                "timestamp": [epoch],
+                "indicators": {"quote": [{
+                    "close": [bhav_row["close"]],
+                    "high": [bhav_row["high"]],
+                    "low": [bhav_row["low"]],
+                    "volume": [bhav_row["volume"]],
+                }]},
+            }]
+        }
+    }
+
+
+def _warm_up_nse_session(opener, retries: int = 2, backoff_base: float = 1.5) -> None:
+    """Visits a short sequence of real NSE pages (discarding their bodies -
+    only the cookies collected by `opener`'s cookie jar matter) so the
+    bhavcopy request below looks like it came from a browser that actually
+    browsed the site, not a bare script. NSE's data endpoints reject requests
+    lacking this. Failures on individual warm-up pages are swallowed - we
+    only give up on the whole warm-up if every path fails every retry."""
+    any_success = False
+    for path in NSE_WARM_UP_PATHS:
+        for attempt in range(retries):
+            try:
+                req = Request(NSE_BASE_URL + path, headers=NSE_BROWSER_HEADERS)
+                with opener.open(req, timeout=15) as resp:
+                    resp.read(2048)
+                any_success = True
+                break
+            except Exception:
+                if attempt < retries - 1:
+                    time.sleep(backoff_base * (attempt + 1))
+    if not any_success:
+        raise RuntimeError("NSE session warm-up failed on every path")
+
+
+def fetch_bhavcopy(max_lookback_days: int = 7, retries: int = 3, backoff_base: float = 2.0) -> Optional[Dict[str, Dict[str, Any]]]:
+    """Fetches NSE's official end-of-day bhavcopy - the exchange's own
+    settlement file with every listed security's OHLC/volume for one trading
+    day - and returns {SYMBOL: {"close", "high", "low", "volume", "asOf"}}
+    for EQ-series rows. This is the actual source of truth for a session's
+    close, sidestepping whatever caching/lag a third-party aggregator
+    (Yahoo) might have.
+
+    Tries today's IST date first, then steps backward to cover weekends/
+    holidays/not-yet-published files, up to max_lookback_days. Every network
+    call is retried with backoff. Returns None - never raises - on total
+    failure, so a run can fall back to Yahoo-only data instead of losing the
+    whole screen: NSE is known to intermittently block datacenter/CI IPs
+    even with a correct session warm-up, and this must not be fatal.
+    """
+    cookie_jar = http.cookiejar.CookieJar()
+    opener = build_opener(HTTPCookieProcessor(cookie_jar))
+
+    warmed_up = False
+    for attempt in range(retries):
+        try:
+            _warm_up_nse_session(opener)
+            warmed_up = True
+            break
+        except Exception:
+            if attempt < retries - 1:
+                time.sleep(backoff_base * (2 ** attempt))
+    if not warmed_up:
+        print("bhavcopy: could not establish an NSE session after retries - falling back to Yahoo-only data")
+        return None
+
+    today_ist = (datetime.now(timezone.utc) + IST_OFFSET).date()
+
+    for offset in range(max_lookback_days):
+        day = today_ist - timedelta(days=offset)
+        date_str = day.strftime("%d%m%Y")
+        url = NSE_ARCHIVE_BASE_URL + SECURITY_BHAVCOPY_PATH_TEMPLATE.format(date=date_str)
+
+        content: Optional[str] = None
+        for attempt in range(retries):
+            try:
+                req = Request(url, headers=NSE_BROWSER_HEADERS)
+                with opener.open(req, timeout=20) as resp:
+                    content = resp.read().decode("utf-8", errors="replace")
+                break
+            except Exception:
+                if attempt < retries - 1:
+                    time.sleep(backoff_base * (2 ** attempt))
+
+        if not content:
+            continue  # this date's file isn't available (weekend/holiday/blocked) - try an earlier date
+
+        try:
+            rows = list(csv.DictReader(StringIO(content)))
+        except Exception:
+            continue
+
+        as_of = f"{day.isoformat()}T00:00:00+05:30"
+        result: Dict[str, Dict[str, Any]] = {}
+        for raw_row in rows:
+            row = {(k or "").strip(): (v.strip() if isinstance(v, str) else v) for k, v in raw_row.items()}
+            if row.get("SERIES") != "EQ":
+                continue
+            symbol = row.get("SYMBOL", "")
+            if not symbol:
+                continue
+            try:
+                close = float(row.get("CLOSE_PRICE", "0") or 0)
+                high = float(row.get("HIGH_PRICE", "0") or 0)
+                low = float(row.get("LOW_PRICE", "0") or 0)
+                volume = float(row.get("TTL_TRD_QNTY", "0") or 0)
+            except ValueError:
+                continue
+            if close <= 0 or volume <= 0:
+                continue
+            result[symbol] = {"close": close, "high": high, "low": low, "volume": volume, "asOf": as_of}
+
+        if result:
+            print(f"bhavcopy: fetched {len(result)} EQ symbols for {day.isoformat()}")
+            return result
+        # empty/unparseable file for this date - try an earlier one
+
+    print(f"bhavcopy: no usable file found in the last {max_lookback_days} days - falling back to Yahoo-only data")
+    return None
 
 
 def infer_bucket(symbol: str, rank_index: int) -> str:
@@ -377,7 +579,7 @@ def build_pick(meta: Dict[str, str], metrics: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def screen_one(meta: Dict[str, str]) -> Optional[Dict[str, Any]]:
+def screen_one(meta: Dict[str, str], bhavcopy_map: Optional[Dict[str, Dict[str, Any]]] = None) -> Optional[Dict[str, Any]]:
     symbol = yahoo_symbol(meta["symbol"])
     long_raw = fetch_json(YAHOO_CHART_URL.format(symbol=symbol, range_="1y"), timeout=20)
     # A short-range request is fetched alongside the 1y history request and
@@ -390,6 +592,14 @@ def screen_one(meta: Dict[str, str]) -> Optional[Dict[str, Any]]:
     except Exception:
         short_raw = {}
     raw = merge_raw_candles(long_raw, short_raw)
+
+    # NSE's own bhavcopy, when available, is the actual source of truth for
+    # the latest close - override whatever Yahoo has for that day (or add it
+    # if Yahoo is missing it entirely).
+    bhav_row = (bhavcopy_map or {}).get(meta["symbol"])
+    if bhav_row:
+        raw = merge_raw_candles(raw, _bhav_row_to_raw(bhav_row), override=True)
+
     candles = clean_candles(raw)
     if not candles:
         return None
@@ -402,10 +612,16 @@ def screen_one(meta: Dict[str, str]) -> Optional[Dict[str, Any]]:
 
 def main() -> None:
     universe = get_universe()
+
+    # Fetched once for the whole universe (bhavcopy is a single file covering
+    # every listed security), not per-symbol. None if NSE couldn't be reached
+    # - screen_one() falls back to Yahoo-only data per-symbol in that case.
+    bhavcopy_map = fetch_bhavcopy()
+
     picks: List[Dict[str, Any]] = []
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(screen_one, meta): meta for meta in universe}
+        futures = {executor.submit(screen_one, meta, bhavcopy_map): meta for meta in universe}
         for index, future in enumerate(as_completed(futures), start=1):
             meta = futures[future]
             try:
