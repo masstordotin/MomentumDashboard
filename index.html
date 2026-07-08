@@ -1035,10 +1035,21 @@ function resolvePrice(symbol, manualPrice) {
   return { price: null, source: 'none', meta: match || null };
 }
 
+// Placeholder-ish values that mean "no real sector was ever recorded", even
+// though something non-empty got stored. Holdings/watchlist rows ended up
+// with the literal string "Unknown" saved as their sector - the ✎ Update
+// prompt displays "Unknown" as the fallback label in its message text, and
+// typing that back (understandably, given the wording) locked it in as if
+// it were a real, explicitly-chosen sector. Treating these as "not stored"
+// lets resolution fall through to the live/NSE-500 lookup instead of
+// permanently freezing on a placeholder.
+const SECTOR_PLACEHOLDERS = new Set(['unknown', 'n/a', 'na', '-', '—', 'none', '']);
+
 // Resolves Sector, in priority order: an explicitly stored sector, a live
 // momentum-picks.json match, then the full NSE 500 lookup (nse-sectors.json).
 function resolveSector(symbol, storedSector) {
-  if (storedSector) return storedSector;
+  const normalizedStored = (storedSector || '').trim();
+  if (normalizedStored && !SECTOR_PLACEHOLDERS.has(normalizedStored.toLowerCase())) return normalizedStored;
   const upperSymbol = (symbol || '').toUpperCase();
   const match = allPicks.find(p => (p.symbol || '').toUpperCase() === upperSymbol);
   if (match && match.sector) return match.sector;
@@ -1150,7 +1161,13 @@ function updateWatchlistItem(id) {
     w.priceUpdatedAt = new Date().toISOString();
   }
   const currentSector = resolveSector(w.symbol, w.sector);
-  const sectorInput = prompt('Sector for ' + w.symbol + ' (leave blank to keep "' + (currentSector || 'Unknown') + '"):', currentSector);
+  // Deliberately does NOT pre-fill or mention a fallback word like "Unknown"
+  // in the prompt - typing that back verbatim previously got saved as a
+  // literal sector value, permanently blocking auto-resolution for that row.
+  const sectorInput = prompt(
+    'Sector for ' + w.symbol + (currentSector ? ' (currently "' + currentSector + '")' : '') +
+    '.\nLeave blank to auto-resolve from NSE data instead of setting one manually:'
+  );
   if (sectorInput !== null && sectorInput.trim() !== '') w.sector = sectorInput.trim();
   renderWatchlist();
 }
@@ -1396,7 +1413,13 @@ function updateHolding(id) {
     h.priceUpdatedAt = new Date().toISOString();
   }
   const currentSector = resolveSector(h.symbol, h.sector);
-  const sectorInput = prompt('Sector for ' + h.symbol + ' (leave blank to keep "' + (currentSector || 'Unknown') + '"):', currentSector);
+  // Deliberately does NOT pre-fill or mention a fallback word like "Unknown"
+  // in the prompt - typing that back verbatim previously got saved as a
+  // literal sector value, permanently blocking auto-resolution for that row.
+  const sectorInput = prompt(
+    'Sector for ' + h.symbol + (currentSector ? ' (currently "' + currentSector + '")' : '') +
+    '.\nLeave blank to auto-resolve from NSE data instead of setting one manually:'
+  );
   if (sectorInput !== null && sectorInput.trim() !== '') h.sector = sectorInput.trim();
   renderHoldings();
 }
