@@ -411,7 +411,7 @@ canvas{display:block;max-width:100%}
         <span style="flex:1"></span>
         <button class="btn" onclick="exportPortfolioJSON()">⬇ Export portfolio-data.json</button>
       </div>
-      <p class="foot-note" style="margin-top:-.5rem;margin-bottom:var(--space-4)">Prices marked <span class="chip live-chip">live</span> come from today's momentum-picks.json (a ~15-stock momentum screen, not the full market) — everything else is manual. Click <strong>✎ Update</strong> on any row to refresh its price/sector yourself; a small "upd DD Mon" note shows how stale a manual price is. Changes here are not saved to the repo until you export and commit portfolio-data.json.</p>
+      <p class="foot-note" style="margin-top:-.5rem;margin-bottom:var(--space-4)">Prices marked <span class="chip live-chip">live</span> come from today's momentum-picks.json (a ~15-stock momentum screen); <span class="chip live-chip">auto</span> comes from portfolio-prices.json, refreshed roughly hourly during market hours by GitHub Actions; everything else is manual — click <strong>✎ Update</strong> on any row to refresh it yourself, and a small "upd DD Mon" note shows how stale a manual price is. Sector auto-resolves from the full NSE 500 list when available. Changes here are not saved to the repo until you export and commit portfolio-data.json.</p>
 
       <!-- WATCHLIST SUB-TAB -->
       <div id="ptab-watchlist">
@@ -538,6 +538,8 @@ let portfolioData = {
 };
 let currentPortfolioTab = 'watchlist';
 let holdingsSectorChartInst = null;
+let nseSectors = {};       // symbol -> { name, sector }, from nse-sectors.json (full NSE 500 list)
+let portfolioPrices = {};  // symbol -> { price, asOf }, from portfolio-prices.json (hourly auto-refresh)
 
 // ══════════════════════════════════════════
 // FETCH WITH CACHE-BUSTING — always fresh
@@ -897,6 +899,41 @@ async function loadPortfolioData() {
   renderPortfolio();
 }
 
+// nse-sectors.json: symbol -> {name, sector} for the full NSE 500 list, refreshed
+// occasionally by refresh_nse_sectors.py. Lets Sector resolve for any tracked
+// stock, not just whichever ~15 names are in today's momentum-picks.json.
+async function loadNseSectors() {
+  try {
+    const url = './nse-sectors.json?cb=' + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      nseSectors = (data && typeof data === 'object') ? data : {};
+    }
+  } catch (err) {
+    console.warn('No existing nse-sectors.json found — sector auto-fill limited to today\'s picks.', err);
+  }
+  renderPortfolio();
+}
+
+// portfolio-prices.json: symbol -> {price, asOf}, refreshed roughly hourly during
+// market hours by refresh_portfolio_prices.py via GitHub Actions. This is the
+// second tier of the price-resolution chain (see resolvePrice below), covering
+// tracked stocks that aren't in today's momentum-picks.json.
+async function loadPortfolioPrices() {
+  try {
+    const url = './portfolio-prices.json?cb=' + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      portfolioPrices = (data && typeof data.prices === 'object' && data.prices) ? data.prices : {};
+    }
+  } catch (err) {
+    console.warn('No existing portfolio-prices.json found — falling back to manual prices.', err);
+  }
+  renderPortfolio();
+}
+
 function genId() {
   return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
@@ -929,13 +966,43 @@ function staleNote(resolved, updatedAtIso) {
   return '<div style="font-size:.65rem;color:var(--color-text-muted)">upd ' + fmtDateShort(updatedAtIso) + '</div>';
 }
 
-// Resolves the current price for a symbol: prefers a live match in today's
-// momentum-picks.json, falls back to a manually stored price.
+// Resolves the current price for a symbol, in priority order:
+//   1. "live"   — a match in today's momentum-picks.json (freshest, market-hours updates)
+//   2. "auto"   — portfolio-prices.json, refreshed ~hourly during market hours by GitHub Actions
+//   3. "manual" — whatever price you last entered via ✎ Update / on add
 function resolvePrice(symbol, manualPrice) {
-  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === (symbol || '').toUpperCase());
+  const upperSymbol = (symbol || '').toUpperCase();
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === upperSymbol);
   if (match && match.price != null) return { price: match.price, source: 'live', meta: match };
+
+  const auto = portfolioPrices[upperSymbol];
+  if (auto && auto.price != null) return { price: auto.price, source: 'auto', meta: auto };
+
   if (manualPrice != null && manualPrice !== '') return { price: Number(manualPrice), source: 'manual', meta: match || null };
   return { price: null, source: 'none', meta: match || null };
+}
+
+// Resolves Sector, in priority order: an explicitly stored sector, a live
+// momentum-picks.json match, then the full NSE 500 lookup (nse-sectors.json).
+function resolveSector(symbol, storedSector) {
+  if (storedSector) return storedSector;
+  const upperSymbol = (symbol || '').toUpperCase();
+  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === upperSymbol);
+  if (match && match.sector) return match.sector;
+  const lookup = nseSectors[upperSymbol];
+  if (lookup && lookup.sector) return lookup.sector;
+  return '';
+}
+
+// Small chip shown next to a resolved price so it's clear whether it's live,
+// auto-refreshed, or something you typed in yourself.
+function sourceChip(resolved) {
+  if (resolved.source === 'live') return '<span class="chip live-chip">live</span>';
+  if (resolved.source === 'auto') {
+    const asOf = resolved.meta && resolved.meta.asOf;
+    return '<span class="chip live-chip" title="auto-refreshed hourly during market hours">auto' + (asOf ? ' ' + fmtDateShort(asOf) : '') + '</span>';
+  }
+  return '';
 }
 
 function renderPortfolio() {
@@ -973,9 +1040,9 @@ function autofillSector(prefix) {
   const sectorEl = document.getElementById(prefix + 'Sector');
   if (!symbolEl || !sectorEl) return;
   const symbol = (symbolEl.value || '').trim().toUpperCase();
-  if (!symbol) return;
-  const match = allPicks.find(p => (p.symbol || '').toUpperCase() === symbol);
-  if (match && !sectorEl.value) sectorEl.value = match.sector || '';
+  if (!symbol || sectorEl.value) return;
+  const sector = resolveSector(symbol, '');
+  if (sector) sectorEl.value = sector;
 }
 
 function addWatchlistItem() {
@@ -992,7 +1059,7 @@ function addWatchlistItem() {
     id: genId(),
     symbol,
     name: match ? match.name : symbol,
-    sector: sectorInput || (match ? match.sector : ''),
+    sector: sectorInput || resolveSector(symbol, ''),
     addedDate: new Date().toISOString().slice(0, 10),
     addedPrice,
     manualPrice: match ? null : addedPrice,
@@ -1029,7 +1096,8 @@ function updateWatchlistItem(id) {
     w.manualPrice = price;
     w.priceUpdatedAt = new Date().toISOString();
   }
-  const sectorInput = prompt('Sector for ' + w.symbol + ' (leave blank to keep "' + (w.sector || 'Unknown') + '"):', w.sector || '');
+  const currentSector = resolveSector(w.symbol, w.sector);
+  const sectorInput = prompt('Sector for ' + w.symbol + ' (leave blank to keep "' + (currentSector || 'Unknown') + '"):', currentSector);
   if (sectorInput !== null && sectorInput.trim() !== '') w.sector = sectorInput.trim();
   renderWatchlist();
 }
@@ -1049,10 +1117,10 @@ function renderWatchlist() {
       <tr>
         <td><strong>${w.symbol}</strong></td>
         <td>${w.name || '—'}</td>
-        <td>${w.sector || '—'}</td>
+        <td>${resolveSector(w.symbol, w.sector) || '—'}</td>
         <td class="mono">${w.addedDate}</td>
         <td class="mono">${fmtMoney(w.addedPrice)}</td>
-        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}${staleNote(resolved, w.priceUpdatedAt)}</td>
+        <td class="mono">${fmtMoney(current)}${sourceChip(resolved)}${staleNote(resolved, w.priceUpdatedAt)}</td>
         <td class="mono" style="color:${pnlColor(change)}">${fmtPct(change)}</td>
         <td>${w.notes || '—'}</td>
         <td>
@@ -1179,7 +1247,7 @@ function renderPaperTrading() {
         <td class="mono">${t.entryDate}</td>
         <td class="mono">${fmtMoney(t.entryPrice)}</td>
         <td class="mono">${t.qty}</td>
-        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}${staleNote(resolved, t.priceUpdatedAt)}</td>
+        <td class="mono">${fmtMoney(current)}${sourceChip(resolved)}${staleNote(resolved, t.priceUpdatedAt)}</td>
         <td class="mono" style="color:${pnlColor(pnl)}">${pnl != null ? fmtMoney(pnl) : '—'}</td>
         <td class="mono" style="color:${pnlColor(retPct)}">${fmtPct(retPct)}</td>
         <td>
@@ -1240,7 +1308,7 @@ function addHolding() {
     id: genId(),
     symbol,
     name: match ? match.name : symbol,
-    sector: sectorInput || (match ? match.sector : ''),
+    sector: sectorInput || resolveSector(symbol, ''),
     qty,
     avgBuyPrice: buyPrice,
     buyDate: new Date().toISOString().slice(0, 10),
@@ -1274,7 +1342,8 @@ function updateHolding(id) {
     h.manualPrice = price;
     h.priceUpdatedAt = new Date().toISOString();
   }
-  const sectorInput = prompt('Sector for ' + h.symbol + ' (leave blank to keep "' + (h.sector || 'Unknown') + '"):', h.sector || '');
+  const currentSector = resolveSector(h.symbol, h.sector);
+  const sectorInput = prompt('Sector for ' + h.symbol + ' (leave blank to keep "' + (currentSector || 'Unknown') + '"):', currentSector);
   if (sectorInput !== null && sectorInput.trim() !== '') h.sector = sectorInput.trim();
   renderHoldings();
 }
@@ -1296,17 +1365,17 @@ function renderHoldings() {
     const pnlPct = invested > 0 ? ((value / invested - 1) * 100) : null;
     totalInvested += invested;
     totalValue += value;
-    const sectorName = h.sector || 'Unknown';
+    const sectorName = resolveSector(h.symbol, h.sector) || 'Unknown';
     sectorMap[sectorName] = (sectorMap[sectorName] || 0) + value;
 
     return `
       <tr>
         <td><strong>${h.symbol}</strong></td>
         <td>${h.name || '—'}</td>
-        <td>${h.sector || '—'}</td>
+        <td>${resolveSector(h.symbol, h.sector) || '—'}</td>
         <td class="mono">${h.qty}</td>
         <td class="mono">${fmtMoney(h.avgBuyPrice)}</td>
-        <td class="mono">${fmtMoney(current)}${resolved.source === 'live' ? '<span class="chip live-chip">live</span>' : ''}${staleNote(resolved, h.priceUpdatedAt)}</td>
+        <td class="mono">${fmtMoney(current)}${sourceChip(resolved)}${staleNote(resolved, h.priceUpdatedAt)}</td>
         <td class="mono">${fmtMoney(invested)}</td>
         <td class="mono">${fmtMoney(value)}</td>
         <td class="mono" style="color:${pnlColor(pnl)}">${fmtMoney(pnl)} (${fmtPct(pnlPct)})</td>
@@ -1395,6 +1464,8 @@ function initTheme() {
 initTheme();
 loadData();
 loadPortfolioData();
+loadNseSectors();
+loadPortfolioPrices();
 </script>
 </body>
 </html>

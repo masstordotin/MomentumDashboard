@@ -7,8 +7,13 @@ This folder gives you a fast testing setup for your NSE momentum dashboard.
 - `index.html` - your dashboard UI.
 - `momentum-picks.json` - daily data payload from Perplexity or your screener.
 - `portfolio-data.json` - your watchlist, paper trades and real holdings (Portfolio tab).
+- `nse-sectors.json` - symbol -> {name, sector} lookup covering the full NSE 500 list, auto-refreshed by GitHub Actions.
+- `portfolio-prices.json` - symbol -> {price, asOf} for everything in your watchlist/holdings/open paper trades, auto-refreshed roughly hourly during market hours by GitHub Actions.
 - `update_dashboard.py` - refreshes the JSON picks through the Perplexity API and can push updates to GitHub.
 - `refresh_momentum_picks.py` - standard-library alternative that screens directly from NSE/Yahoo data (no Perplexity dependency).
+- `refresh_nse_sectors.py` - builds `nse-sectors.json` from the NSE 500 constituent list.
+- `refresh_portfolio_prices.py` - builds `portfolio-prices.json` for your tracked symbols from Yahoo Finance.
+- `.github/workflows/refresh-portfolio.yml` - runs the two scripts above automatically, roughly hourly during NSE market hours, and commits the results.
 - `SCREENER_REFERENCE.md` - canonical NSE momentum screener rules for the project.
 
 ## Portfolio Tab
@@ -19,9 +24,11 @@ The **Portfolio** view has three sub-tabs:
 - **Paper Trading** - a virtual cash account (default ₹10,00,000) for simulated buys/sells, with open positions, closed trades, and realized/unrealized P&L.
 - **Holdings** - your real positions, valuation, P&L and sector allocation.
 
-Current price for any tracked symbol is pulled automatically from `momentum-picks.json` when that symbol appears in today's screen; otherwise you enter a price manually.
+**Current price** resolves in this order: (1) a live match in today's `momentum-picks.json`, marked <code>live</code>; (2) `portfolio-prices.json`, auto-refreshed roughly hourly during market hours, marked <code>auto</code>; (3) whatever you last typed in via **✎ Update**, marked with an "upd DD Mon" note. **Sector** resolves from a stored value, then a live picks match, then the full NSE 500 lookup in `nse-sectors.json`.
 
-All edits happen in your browser only. Click **⬇ Export portfolio-data.json** on the Portfolio page, then commit the downloaded file to the repo the same way you commit `momentum-picks.json`, to persist changes and see them on other devices.
+The automated refresh (see `.github/workflows/refresh-portfolio.yml`) needs no API key or external account - it runs on GitHub's own infrastructure and commits `nse-sectors.json`/`portfolio-prices.json` back to the repo on a schedule. One caveat: NSE's archives site occasionally blocks requests from cloud/datacenter IPs (including CI runners), so the sector-refresh step is allowed to fail without blocking the price refresh - if you notice sectors going stale, check the Actions tab for that step's logs.
+
+Editing anything in the Portfolio tab (adding/removing/updating watchlist items, trades, or holdings) only changes your browser session. Click **⬇ Export portfolio-data.json** and commit the downloaded file to persist those specific edits and see them on other devices - separate from the automated price/sector refresh, which commits on its own.
 
 ## Quick Local Workflow
 
