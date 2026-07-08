@@ -480,6 +480,22 @@ canvas{display:block;max-width:100%}
 
       <!-- HOLDINGS SUB-TAB -->
       <div id="ptab-holdings" style="display:none">
+        <!-- Portfolio switcher: lets you keep separate named portfolios (e.g. per
+             client) inside the same Holdings sub-tab, side by side with an "All
+             portfolios" combined view. -->
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card-inner">
+            <div class="toolbar" style="grid-template-columns:1.4fr auto auto;margin-bottom:0;align-items:end">
+              <div class="field">
+                <label for="hPortfolioFilter">Portfolio</label>
+                <select id="hPortfolioFilter" class="select" onchange="onHoldingsPortfolioFilterChange()"></select>
+              </div>
+              <div class="field"><label>&nbsp;</label><button class="btn" onclick="createNewPortfolio()">+ New Portfolio</button></div>
+              <div class="field"><label>&nbsp;</label><button class="btn" id="hManagePortfolioBtn" onclick="manageCurrentPortfolio()" style="display:none">⚙ Manage</button></div>
+            </div>
+          </div>
+        </div>
+
         <div class="grid kpi-grid">
           <div class="card kpi"><h3>Invested</h3><div class="value" id="hInvested">—</div><div class="sub">Total capital deployed</div></div>
           <div class="card kpi"><h3>Current Value</h3><div class="value" id="hValue">—</div><div class="sub">At latest known price</div></div>
@@ -494,23 +510,25 @@ canvas{display:block;max-width:100%}
               <div class="field"><label for="hSector">Sector</label><input id="hSector" class="input" placeholder="auto if in picks"></div>
               <div class="field"><label for="hQty">Quantity</label><input id="hQty" class="input" type="number" step="1"></div>
               <div class="field"><label for="hBuyPrice">Avg Buy Price</label><input id="hBuyPrice" class="input" type="number" step="0.01"></div>
-              <div class="field"><label>&nbsp;</label><button class="btn primary" onclick="addHolding()">+ Add Holding</button></div>
+              <div class="field"><label>&nbsp;</label><button class="btn primary" id="hAddBtn" onclick="addHolding()">+ Add Holding</button></div>
             </div>
+            <div class="foot-note" id="hAddHint" style="display:none">Select a specific portfolio above (not "All Portfolios") to add a holding to it.</div>
           </div>
         </div>
 
-        <div class="grid charts-grid" style="grid-template-columns:2fr 1fr">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>Symbol</th><th>Name</th><th>Sector</th><th>Qty</th><th>Avg Buy</th><th>Current</th><th>Invested</th><th>Value</th><th>P&amp;L</th><th></th></tr></thead>
-              <tbody id="holdingsBody"><tr class="empty-row"><td colspan="10">Loading…</td></tr></tbody>
-            </table>
-          </div>
-          <div class="card">
-            <div class="card-inner">
-              <div class="card-header"><h3>🏭 Allocation by Sector</h3></div>
-              <div class="chart-wrap" style="height:260px"><canvas id="holdingsSectorChart"></canvas></div>
-            </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Symbol</th><th>Name</th><th>Sector</th><th>Portfolio</th><th>Qty</th><th>Avg Buy</th><th>Current</th><th>Invested</th><th>Value</th><th>P&amp;L</th><th></th></tr></thead>
+            <tbody id="holdingsBody"><tr class="empty-row"><td colspan="11">Loading…</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Sector allocation now sits below the holdings table (was previously
+             side-by-side) so the table gets full width to breathe. -->
+        <div class="card" style="margin-top:var(--space-4);max-width:640px;margin-left:auto;margin-right:auto">
+          <div class="card-inner">
+            <div class="card-header"><h3>🏭 Allocation by Sector</h3></div>
+            <div class="chart-wrap" style="height:280px"><canvas id="holdingsSectorChart"></canvas></div>
           </div>
         </div>
       </div>
@@ -530,14 +548,22 @@ let sectorChartInst = null;
 let currentView = 'overview';
 
 // Portfolio tracker state (watchlist / paper trading / holdings)
+// "portfolios" lets Holdings keep separate named books (e.g. one per client)
+// in the same dashboard: {id, name, clientCode}. Holdings reference one via
+// holding.portfolioId; a holding with no portfolioId (including every
+// holding that existed before this feature) is treated as "Unassigned".
 let portfolioData = {
   updatedAt: null,
   paperAccount: { startingCapital: 1000000, cashBalance: 1000000 },
   watchlist: [],
   paperTrades: [],
-  holdings: []
+  holdings: [],
+  portfolios: []
 };
 let currentPortfolioTab = 'watchlist';
+// Which portfolio the Holdings sub-tab is currently filtered to: 'all',
+// 'unassigned', or a portfolios[].id.
+let currentHoldingsPortfolioFilter = 'all';
 let holdingsSectorChartInst = null;
 let nseSectors = {};       // symbol -> { name, sector }, from nse-sectors.json (full NSE 500 list)
 let portfolioPrices = {};  // symbol -> { price, asOf }, from portfolio-prices.json (hourly auto-refresh)
@@ -912,7 +938,11 @@ async function loadPortfolioData() {
         paperAccount: data.paperAccount || { startingCapital: 1000000, cashBalance: 1000000 },
         watchlist: Array.isArray(data.watchlist) ? data.watchlist : [],
         paperTrades: Array.isArray(data.paperTrades) ? data.paperTrades : [],
-        holdings: Array.isArray(data.holdings) ? data.holdings : []
+        holdings: Array.isArray(data.holdings) ? data.holdings : [],
+        // Older saved portfolio-data.json files won't have this field yet -
+        // default to empty so existing holdings just show up as "Unassigned"
+        // instead of breaking.
+        portfolios: Array.isArray(data.portfolios) ? data.portfolios : []
       };
     }
   } catch (err) {
@@ -1366,7 +1396,111 @@ function renderPaperTrading() {
 }
 
 // ── Holdings ──
+// Resolves a portfolios[].id to a display label, e.g. "Client A (ABC123)".
+// A holding with no portfolioId - including every holding that existed
+// before this feature was added - is always "Unassigned", never hidden.
+function portfolioLabel(portfolioId) {
+  if (!portfolioId) return 'Unassigned';
+  const p = portfolioData.portfolios.find(x => x.id === portfolioId);
+  if (!p) return 'Unassigned';
+  return p.clientCode ? `${p.name} (${p.clientCode})` : p.name;
+}
+
+// Holdings currently visible under the active portfolio filter ('all',
+// 'unassigned', or a specific portfolios[].id).
+function getVisibleHoldings() {
+  if (currentHoldingsPortfolioFilter === 'all') return portfolioData.holdings;
+  if (currentHoldingsPortfolioFilter === 'unassigned') return portfolioData.holdings.filter(h => !h.portfolioId);
+  return portfolioData.holdings.filter(h => h.portfolioId === currentHoldingsPortfolioFilter);
+}
+
+// Populates the portfolio dropdown and keeps the Add Holding form's
+// enabled/disabled state and hint text in sync with the current selection.
+// New holdings must be attached to a specific portfolio (or explicitly
+// "Unassigned"), never silently dropped into "All".
+function renderPortfolioSelector() {
+  const select = document.getElementById('hPortfolioFilter');
+  if (!select) return;
+
+  const options = [
+    '<option value="all">All Portfolios</option>',
+    '<option value="unassigned">Unassigned</option>',
+    ...portfolioData.portfolios.map(p =>
+      `<option value="${p.id}">${p.clientCode ? p.name + ' (' + p.clientCode + ')' : p.name}</option>`
+    )
+  ];
+  select.innerHTML = options.join('');
+
+  // If the previously-selected portfolio was deleted, fall back to "All".
+  const stillExists = currentHoldingsPortfolioFilter === 'all' || currentHoldingsPortfolioFilter === 'unassigned' ||
+    portfolioData.portfolios.some(p => p.id === currentHoldingsPortfolioFilter);
+  if (!stillExists) currentHoldingsPortfolioFilter = 'all';
+  select.value = currentHoldingsPortfolioFilter;
+
+  const isAll = currentHoldingsPortfolioFilter === 'all';
+  const isNamedPortfolio = !isAll && currentHoldingsPortfolioFilter !== 'unassigned';
+  const addBtn = document.getElementById('hAddBtn');
+  const addHint = document.getElementById('hAddHint');
+  const manageBtn = document.getElementById('hManagePortfolioBtn');
+  if (addBtn) addBtn.disabled = isAll;
+  if (addHint) addHint.style.display = isAll ? '' : 'none';
+  if (manageBtn) manageBtn.style.display = isNamedPortfolio ? '' : 'none';
+}
+
+function onHoldingsPortfolioFilterChange() {
+  const select = document.getElementById('hPortfolioFilter');
+  if (!select) return;
+  currentHoldingsPortfolioFilter = select.value;
+  renderHoldings();
+}
+
+function createNewPortfolio() {
+  const name = prompt('Portfolio name (e.g. client or account name):');
+  if (name === null || !name.trim()) return;
+  const clientCode = prompt('Client code (optional, leave blank if none):');
+  const portfolio = { id: genId(), name: name.trim(), clientCode: (clientCode || '').trim() };
+  portfolioData.portfolios.push(portfolio);
+  currentHoldingsPortfolioFilter = portfolio.id;
+  renderHoldings();
+}
+
+// Rename or delete the currently-selected portfolio. Deleting never deletes
+// its holdings - they become "Unassigned" instead, so switching or cleaning
+// up portfolios can't silently destroy position data.
+function manageCurrentPortfolio() {
+  const id = currentHoldingsPortfolioFilter;
+  if (id === 'all' || id === 'unassigned') return;
+  const portfolio = portfolioData.portfolios.find(p => p.id === id);
+  if (!portfolio) return;
+
+  const choice = prompt(
+    'Managing "' + portfolio.name + (portfolio.clientCode ? ' (' + portfolio.clientCode + ')' : '') + '".\n' +
+    'Type "rename" to rename it, or "delete" to delete it (its holdings become Unassigned, not deleted):'
+  );
+  if (!choice) return;
+  const action = choice.trim().toLowerCase();
+
+  if (action === 'rename') {
+    const newName = prompt('New portfolio name:', portfolio.name);
+    if (newName === null || !newName.trim()) return;
+    const newClientCode = prompt('New client code (leave blank for none):', portfolio.clientCode || '');
+    portfolio.name = newName.trim();
+    portfolio.clientCode = (newClientCode || '').trim();
+    renderHoldings();
+  } else if (action === 'delete') {
+    if (!confirm('Delete "' + portfolio.name + '"? Its holdings will move to "Unassigned", not be deleted.')) return;
+    portfolioData.holdings.forEach(h => { if (h.portfolioId === id) h.portfolioId = null; });
+    portfolioData.portfolios = portfolioData.portfolios.filter(p => p.id !== id);
+    currentHoldingsPortfolioFilter = 'all';
+    renderHoldings();
+  }
+}
+
 function addHolding() {
+  if (currentHoldingsPortfolioFilter === 'all') {
+    alert('Select a specific portfolio (not "All Portfolios") above before adding a holding.');
+    return;
+  }
   const symbol = (document.getElementById('hSymbol').value || '').trim().toUpperCase();
   const sectorInput = document.getElementById('hSector').value.trim();
   const qty = Number(document.getElementById('hQty').value);
@@ -1379,6 +1513,7 @@ function addHolding() {
     symbol,
     name: match ? match.name : symbol,
     sector: sectorInput || resolveSector(symbol, ''),
+    portfolioId: currentHoldingsPortfolioFilter === 'unassigned' ? null : currentHoldingsPortfolioFilter,
     qty,
     avgBuyPrice: buyPrice,
     buyDate: new Date().toISOString().slice(0, 10),
@@ -1428,11 +1563,14 @@ function renderHoldings() {
   const tbody = document.getElementById('holdingsBody');
   if (!tbody) return;
 
+  renderPortfolioSelector();
+
   let totalInvested = 0;
   let totalValue = 0;
   const sectorMap = {};
+  const visibleHoldings = getVisibleHoldings();
 
-  const rows = portfolioData.holdings.map(h => {
+  const rows = visibleHoldings.map(h => {
     const resolved = resolvePrice(h.symbol, h.manualPrice);
     const current = resolved.price != null ? resolved.price : h.avgBuyPrice;
     const invested = h.avgBuyPrice * h.qty;
@@ -1449,6 +1587,7 @@ function renderHoldings() {
         <td><strong>${h.symbol}</strong></td>
         <td>${h.name || '—'}</td>
         <td>${resolveSector(h.symbol, h.sector) || '—'}</td>
+        <td>${portfolioLabel(h.portfolioId)}</td>
         <td class="mono">${h.qty}</td>
         <td class="mono">${fmtMoney(h.avgBuyPrice)}</td>
         <td class="mono">${fmtMoney(current)}${sourceChip(resolved)}${staleNote(resolved, h.priceUpdatedAt)}</td>
@@ -1462,14 +1601,14 @@ function renderHoldings() {
       </tr>`;
   }).join('');
 
-  tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="10">No holdings added yet.</td></tr>';
+  tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="11">No holdings in this view yet.</td></tr>';
 
   document.getElementById('hInvested').textContent = fmtMoney(totalInvested);
   document.getElementById('hValue').textContent = fmtMoney(totalValue);
   const pnlEl = document.getElementById('hPnl');
   pnlEl.textContent = fmtMoney(totalValue - totalInvested);
   pnlEl.style.color = pnlColor(totalValue - totalInvested);
-  document.getElementById('hCount').textContent = portfolioData.holdings.length;
+  document.getElementById('hCount').textContent = visibleHoldings.length;
 
   renderHoldingsSectorChart(sectorMap);
 }
