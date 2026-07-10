@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T23:35:35.889Z",
+  "updatedAt": "2026-07-10T07:35:47.682Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -181,6 +181,50 @@
       "addedPrice": 4866.4,
       "manualPrice": null,
       "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremeal5gefsa",
+      "symbol": "SYRMA",
+      "name": "Syrma SGS Technology",
+      "sector": "Capital Goods",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1441,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremej3kh4tqj",
+      "symbol": "WELCORP",
+      "name": "Welspun Corp",
+      "sector": "Capital Goods",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1601.9,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremf86flypyw",
+      "symbol": "GRAVITA",
+      "name": "GRAVITA",
+      "sector": "Metals & Mining",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1811.4,
+      "manualPrice": 1811.4,
+      "priceUpdatedAt": "2026-07-10T07:35:21.639Z",
+      "notes": ""
+    },
+    {
+      "id": "id_mremfpl7ylw7x",
+      "symbol": "TITAN",
+      "name": "TITAN",
+      "sector": "Consumer Durables",
+      "addedDate": "2026-07-10",
+      "addedPrice": 4555.8,
+      "manualPrice": 4555.8,
+      "priceUpdatedAt": "2026-07-10T07:35:44.203Z",
       "notes": ""
     }
   ],
