@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-10T07:35:47.682Z",
+  "updatedAt": "2026-07-10T07:37:51.925Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -225,6 +225,28 @@
       "addedPrice": 4555.8,
       "manualPrice": 4555.8,
       "priceUpdatedAt": "2026-07-10T07:35:44.203Z",
+      "notes": ""
+    },
+    {
+      "id": "id_mremhya2crq8z",
+      "symbol": "SUNPHARMA",
+      "name": "Sun Pharmaceutical Industries",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1938.7,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremibj42zxn4",
+      "symbol": "JINDALSAW",
+      "name": "Jindal Saw",
+      "sector": "Capital Goods",
+      "addedDate": "2026-07-10",
+      "addedPrice": 272.3,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
       "notes": ""
     }
   ],
