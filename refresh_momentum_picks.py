@@ -307,6 +307,56 @@ def _bhav_row_to_raw(bhav_row: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _drop_unconfirmed_today(raw: Dict[str, Any], today_str: str, bhav_day: Optional[str]) -> Dict[str, Any]:
+    """Yahoo's short-range daily fetch (added to merge_raw_candles's base
+    series) can include TODAY's still-forming intraday bar whenever this
+    script runs during live NSE market hours - its "close" is just the
+    latest traded price (still changing) and its "volume" is only however
+    much has traded so far that session, nowhere near a full day's volume.
+    Treating that as a genuine completed candle is exactly what caused the
+    screener to qualify zero candidates: partial-day volume divided into a
+    30-day average of FULL-day volumes fails the volRatio>=1.5 gate almost
+    universally, and which stocks happen to clear it becomes a function of
+    what time of day the script happened to run - explaining why two runs
+    on "the same criteria" produced wildly different results.
+
+    Drops any candle dated today (IST) UNLESS NSE's own bhavcopy has already
+    published that exact date - bhavcopy is only ever generated after the
+    session settles, so its presence is proof the day is genuinely complete,
+    not a live snapshot.
+    """
+    if bhav_day == today_str:
+        return raw  # today's session is confirmed complete/published - safe to keep as-is
+
+    try:
+        result = raw["chart"]["result"][0]
+        timestamps = result.get("timestamp") or []
+        quote = result["indicators"]["quote"][0]
+    except (KeyError, IndexError, TypeError):
+        return raw
+
+    keep_idx = [i for i, ts in enumerate(timestamps) if epoch_to_ist_asof(ts)[:10] != today_str]
+    if len(keep_idx) == len(timestamps):
+        return raw  # nothing dated today to drop
+
+    def pick(values: List[Any]) -> List[Any]:
+        return [values[i] for i in keep_idx if i < len(values)]
+
+    return {
+        "chart": {
+            "result": [{
+                "timestamp": pick(timestamps),
+                "indicators": {"quote": [{
+                    "close": pick(quote.get("close", [])),
+                    "high": pick(quote.get("high", [])),
+                    "low": pick(quote.get("low", [])),
+                    "volume": pick(quote.get("volume", [])),
+                }]},
+            }]
+        }
+    }
+
+
 def _warm_up_nse_session(opener, retries: int = 2, backoff_base: float = 1.5) -> None:
     """Visits a short sequence of real NSE pages (discarding their bodies -
     only the cookies collected by `opener`'s cookie jar matter) so the
@@ -593,10 +643,18 @@ def screen_one(meta: Dict[str, str], bhavcopy_map: Optional[Dict[str, Dict[str, 
         short_raw = {}
     raw = merge_raw_candles(long_raw, short_raw)
 
+    bhav_row = (bhavcopy_map or {}).get(meta["symbol"])
+    bhav_day = bhav_row["asOf"][:10] if bhav_row else None
+
+    # See _drop_unconfirmed_today() - the short-range fetch above can include
+    # today's still-forming intraday bar during live market hours, which is
+    # not a real completed session and must never be scored as one.
+    today_ist_str = (datetime.now(timezone.utc) + IST_OFFSET).date().isoformat()
+    raw = _drop_unconfirmed_today(raw, today_ist_str, bhav_day)
+
     # NSE's own bhavcopy, when available, is the actual source of truth for
     # the latest close - override whatever Yahoo has for that day (or add it
     # if Yahoo is missing it entirely).
-    bhav_row = (bhavcopy_map or {}).get(meta["symbol"])
     if bhav_row:
         raw = merge_raw_candles(raw, _bhav_row_to_raw(bhav_row), override=True)
 
