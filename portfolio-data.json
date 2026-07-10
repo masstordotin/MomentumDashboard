@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-10T07:37:51.925Z",
+  "updatedAt": "2026-07-10T09:01:00.006Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -245,6 +245,28 @@
       "sector": "Capital Goods",
       "addedDate": "2026-07-10",
       "addedPrice": 272.3,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrepglzg4dhz7",
+      "symbol": "RAINBOW",
+      "name": "Rainbow Childrens Medicare",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1481.5,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrepgtzer6f02",
+      "symbol": "ASTERDM",
+      "name": "Aster DM Healthcare",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-10",
+      "addedPrice": 807.15,
       "manualPrice": null,
       "priceUpdatedAt": null,
       "notes": ""
