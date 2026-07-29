@@ -196,7 +196,7 @@
     "sector": "Consumer Durables"
   },
   "ASTERDM": {
-    "name": "Aster DM Healthcare",
+    "name": "Aster DM Quality Care",
     "sector": "Healthcare"
   },
   "ASTRAL": {
@@ -1019,10 +1019,6 @@
     "name": "Ipca Laboratories",
     "sector": "Healthcare"
   },
-  "JBCHEPHARM": {
-    "name": "J.B. Chemicals & Pharmaceuticals",
-    "sector": "Healthcare"
-  },
   "JKCEMENT": {
     "name": "J.K. Cement",
     "sector": "Construction Materials"
@@ -1526,6 +1522,10 @@
   "PRESTIGE": {
     "name": "Prestige Estates Projects",
     "sector": "Realty"
+  },
+  "PFOCUS": {
+    "name": "Prime Focus",
+    "sector": "Media Entertainment & Publication"
   },
   "PNB": {
     "name": "Punjab National Bank",
