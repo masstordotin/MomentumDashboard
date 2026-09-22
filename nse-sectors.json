@@ -807,6 +807,10 @@
     "name": "HDFC Life Insurance Company",
     "sector": "Financial Services"
   },
+  "HEGAM": {
+    "name": "HEG Advanced Materials",
+    "sector": "Capital Goods"
+  },
   "HAVELLS": {
     "name": "Havells India",
     "sector": "Consumer Durables"
