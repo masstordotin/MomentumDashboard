@@ -3,10 +3,6 @@
     "name": "360 ONE WAM",
     "sector": "Financial Services"
   },
-  "3MINDIA": {
-    "name": "3M India",
-    "sector": "Diversified"
-  },
   "ABB": {
     "name": "ABB India",
     "sector": "Capital Goods"
@@ -87,14 +83,6 @@
     "name": "Aditya Birla Capital",
     "sector": "Financial Services"
   },
-  "ABFRL": {
-    "name": "Aditya Birla Fashion and Retail",
-    "sector": "Consumer Services"
-  },
-  "ABLBL": {
-    "name": "Aditya Birla Lifestyle Brands",
-    "sector": "Consumer Services"
-  },
   "ABREL": {
     "name": "Aditya Birla Real Estate",
     "sector": "Realty"
@@ -114,6 +102,10 @@
   "AEGISVOPAK": {
     "name": "Aegis Vopak Terminals",
     "sector": "Oil Gas & Consumable Fuels"
+  },
+  "AETHER": {
+    "name": "Aether Industries",
+    "sector": "Chemicals"
   },
   "AFCONS": {
     "name": "Afcons Infrastructure",
@@ -219,6 +211,10 @@
     "name": "Authum Investment & Infrastructure",
     "sector": "Financial Services"
   },
+  "AVANTIFEED": {
+    "name": "Avanti Feeds",
+    "sector": "Fast Moving Consumer Goods"
+  },
   "DMART": {
     "name": "Avenue Supermarts",
     "sector": "Consumer Services"
@@ -226,6 +222,10 @@
   "AXISBANK": {
     "name": "Axis Bank",
     "sector": "Financial Services"
+  },
+  "AZAD": {
+    "name": "Azad Engineering",
+    "sector": "Capital Goods"
   },
   "BEML": {
     "name": "BEML",
@@ -287,10 +287,6 @@
     "name": "Bata India",
     "sector": "Consumer Durables"
   },
-  "BAYERCROP": {
-    "name": "Bayer Cropscience",
-    "sector": "Chemicals"
-  },
   "BELRISE": {
     "name": "Belrise Industries",
     "sector": "Automobile and Auto Components"
@@ -298,6 +294,10 @@
   "BERGEPAINT": {
     "name": "Berger Paints India",
     "sector": "Consumer Durables"
+  },
+  "BHARATCOAL": {
+    "name": "Bharat Coking Coal",
+    "sector": "Oil Gas & Consumable Fuels"
   },
   "BDL": {
     "name": "Bharat Dynamics",
@@ -327,10 +327,6 @@
     "name": "Bharti Hexacom",
     "sector": "Telecommunication"
   },
-  "BIKAJI": {
-    "name": "Bikaji Foods International",
-    "sector": "Fast Moving Consumer Goods"
-  },
   "GROWW": {
     "name": "Billionbrains Garage Ventures",
     "sector": "Financial Services"
@@ -343,21 +339,13 @@
     "name": "Birlasoft",
     "sector": "Information Technology"
   },
-  "BLUEDART": {
-    "name": "Blue Dart Express",
-    "sector": "Services"
-  },
-  "BLUEJET": {
-    "name": "Blue Jet Healthcare",
-    "sector": "Healthcare"
+  "BBOX": {
+    "name": "Black Box",
+    "sector": "Information Technology"
   },
   "BLUESTARCO": {
     "name": "Blue Star",
     "sector": "Consumer Durables"
-  },
-  "BBTC": {
-    "name": "Bombay Burmah Trading Corporation",
-    "sector": "Fast Moving Consumer Goods"
   },
   "BOSCHLTD": {
     "name": "Bosch",
@@ -374,10 +362,6 @@
   "BRITANNIA": {
     "name": "Britannia Industries",
     "sector": "Fast Moving Consumer Goods"
-  },
-  "MAPMYINDIA": {
-    "name": "C.E. Info Systems",
-    "sector": "Information Technology"
   },
   "CCL": {
     "name": "CCL Products (I)",
@@ -447,9 +431,9 @@
     "name": "Central Depository Services (India)",
     "sector": "Financial Services"
   },
-  "CHALET": {
-    "name": "Chalet Hotels",
-    "sector": "Consumer Services"
+  "CMPDI": {
+    "name": "Central Mine Planning & Design Institute",
+    "sector": "Services"
   },
   "CHAMBLFERT": {
     "name": "Chambal Fertilizers & Chemicals",
@@ -478,6 +462,10 @@
   "CUB": {
     "name": "City Union Bank",
     "sector": "Financial Services"
+  },
+  "CLEANMAX": {
+    "name": "Clean Max Enviro Energy Solutions",
+    "sector": "Power"
   },
   "CLEAN": {
     "name": "Clean Science and Technology",
@@ -535,13 +523,13 @@
     "name": "Cummins India",
     "sector": "Capital Goods"
   },
+  "CUPID": {
+    "name": "Cupid",
+    "sector": "Fast Moving Consumer Goods"
+  },
   "CYIENT": {
     "name": "Cyient",
     "sector": "Information Technology"
-  },
-  "DCMSHRIRAM": {
-    "name": "DCM Shriram",
-    "sector": "Diversified"
   },
   "DLF": {
     "name": "DLF",
@@ -635,10 +623,6 @@
     "name": "Engineers India",
     "sector": "Construction"
   },
-  "ERIS": {
-    "name": "Eris Lifesciences",
-    "sector": "Healthcare"
-  },
   "ESCORTS": {
     "name": "Escorts Kubota",
     "sector": "Capital Goods"
@@ -682,6 +666,10 @@
   "FORTIS": {
     "name": "Fortis Healthcare",
     "sector": "Healthcare"
+  },
+  "FRACTAL": {
+    "name": "Fractal Analytics",
+    "sector": "Information Technology"
   },
   "GAIL": {
     "name": "GAIL (India)",
@@ -730,10 +718,6 @@
   "MEDANTA": {
     "name": "Global Health",
     "sector": "Healthcare"
-  },
-  "GODIGIT": {
-    "name": "Go Digit General Insurance",
-    "sector": "Financial Services"
   },
   "GPIL": {
     "name": "Godawari Power & Ispat",
@@ -907,6 +891,10 @@
     "name": "IIFL Finance",
     "sector": "Financial Services"
   },
+  "INOXINDIA": {
+    "name": "INOX India",
+    "sector": "Capital Goods"
+  },
   "IRB": {
     "name": "IRB Infrastructure Developers",
     "sector": "Construction"
@@ -926,10 +914,6 @@
   "ITI": {
     "name": "ITI",
     "sector": "Telecommunication"
-  },
-  "INDGN": {
-    "name": "Indegene",
-    "sector": "Healthcare"
   },
   "INDIACEM": {
     "name": "India Cements",
@@ -1035,10 +1019,6 @@
     "name": "JSW Cement",
     "sector": "Construction Materials"
   },
-  "JSWDULUX": {
-    "name": "JSW Dulux",
-    "sector": "Consumer Durables"
-  },
   "JSWENERGY": {
     "name": "JSW Energy",
     "sector": "Power"
@@ -1087,10 +1067,6 @@
     "name": "Jubilant Ingrevia",
     "sector": "Chemicals"
   },
-  "JUBLPHARMA": {
-    "name": "Jubilant Pharmova",
-    "sector": "Healthcare"
-  },
   "JWL": {
     "name": "Jupiter Wagons",
     "sector": "Capital Goods"
@@ -1110,6 +1086,10 @@
   "KPITTECH": {
     "name": "KPIT Technologies",
     "sector": "Information Technology"
+  },
+  "KSB": {
+    "name": "KSB",
+    "sector": "Capital Goods"
   },
   "KAJARIACER": {
     "name": "Kajaria Ceramics",
@@ -1138,6 +1118,10 @@
   "KFINTECH": {
     "name": "Kfin Technologies",
     "sector": "Financial Services"
+  },
+  "KIRLOSBROS": {
+    "name": "Kirloskar Brothers",
+    "sector": "Capital Goods"
   },
   "KIRLOSENG": {
     "name": "Kirloskar Oil Eng",
@@ -1179,17 +1163,9 @@
     "name": "Larsen & Toubro",
     "sector": "Construction"
   },
-  "LATENTVIEW": {
-    "name": "Latent View Analytics",
-    "sector": "Information Technology"
-  },
   "LAURUSLABS": {
     "name": "Laurus Labs",
     "sector": "Healthcare"
-  },
-  "THELEELA": {
-    "name": "Leela Palaces Hotels & Resorts",
-    "sector": "Consumer Services"
   },
   "LEMONTREE": {
     "name": "Lemon Tree Hotels",
@@ -1363,16 +1339,8 @@
     "name": "Neuland Laboratories",
     "sector": "Healthcare"
   },
-  "NEWGEN": {
-    "name": "Newgen Software Technologies",
-    "sector": "Information Technology"
-  },
   "NAM-INDIA": {
     "name": "Nippon Life India Asset Management",
-    "sector": "Financial Services"
-  },
-  "NIVABUPA": {
-    "name": "Niva Bupa Health Insurance Company",
     "sector": "Financial Services"
   },
   "NUVAMA": {
@@ -1463,10 +1431,6 @@
     "name": "Petronet LNG",
     "sector": "Oil Gas & Consumable Fuels"
   },
-  "PFIZER": {
-    "name": "Pfizer",
-    "sector": "Healthcare"
-  },
   "PHOENIXLTD": {
     "name": "Phoenix Mills",
     "sector": "Realty"
@@ -1522,6 +1486,10 @@
   "PFOCUS": {
     "name": "Prime Focus",
     "sector": "Media Entertainment & Publication"
+  },
+  "PRIVISCL": {
+    "name": "Privi Speciality Chemicals",
+    "sector": "Chemicals"
   },
   "PNB": {
     "name": "Punjab National Bank",
@@ -1579,9 +1547,9 @@
     "name": "Reliance Power",
     "sector": "Power"
   },
-  "SBFC": {
-    "name": "SBFC Finance",
-    "sector": "Financial Services"
+  "RUBICON": {
+    "name": "Rubicon Research",
+    "sector": "Healthcare"
   },
   "SBICARD": {
     "name": "SBI Cards and Payment Services",
@@ -1594,6 +1562,10 @@
   "SJVN": {
     "name": "SJVN",
     "sector": "Power"
+  },
+  "SHRIPISTON": {
+    "name": "SPR Auto Technologies",
+    "sector": "Automobile and Auto Components"
   },
   "SRF": {
     "name": "SRF",
@@ -1615,17 +1587,13 @@
     "name": "Samvardhana Motherson International",
     "sector": "Automobile and Auto Components"
   },
-  "SAPPHIRE": {
-    "name": "Sapphire Foods India",
-    "sector": "Consumer Services"
+  "SANSERA": {
+    "name": "Sansera Engineering",
+    "sector": "Automobile and Auto Components"
   },
   "SARDAEN": {
     "name": "Sarda Energy and Minerals",
     "sector": "Metals & Mining"
-  },
-  "SAREGAMA": {
-    "name": "Saregama India Ltd",
-    "sector": "Media Entertainment & Publication"
   },
   "SCHAEFFLER": {
     "name": "Schaeffler India",
@@ -1675,10 +1643,6 @@
     "name": "Sona BLW Precision Forgings",
     "sector": "Automobile and Auto Components"
   },
-  "SONATSOFTW": {
-    "name": "Sonata Software",
-    "sector": "Information Technology"
-  },
   "STARHEALTH": {
     "name": "Star Health and Allied Insurance Company",
     "sector": "Financial Services"
@@ -1711,10 +1675,6 @@
     "name": "Supreme Industries",
     "sector": "Capital Goods"
   },
-  "SPLPETRO": {
-    "name": "Supreme Petrochem",
-    "sector": "Chemicals"
-  },
   "SUZLON": {
     "name": "Suzlon Energy",
     "sector": "Capital Goods"
@@ -1738,6 +1698,10 @@
   "TBOTEK": {
     "name": "TBO Tek",
     "sector": "Consumer Services"
+  },
+  "TDPOWERSYS": {
+    "name": "TD Power Systems",
+    "sector": "Capital Goods"
   },
   "TVSMOTOR": {
     "name": "TVS Motor Company",
@@ -1815,6 +1779,10 @@
     "name": "Tenneco Clean Air India",
     "sector": "Automobile and Auto Components"
   },
+  "THANGAMAYL": {
+    "name": "Thangamayil Jewellery",
+    "sector": "Consumer Durables"
+  },
   "NIACL": {
     "name": "The New India Assurance Company",
     "sector": "Financial Services"
@@ -1850,10 +1818,6 @@
   "TARIL": {
     "name": "Transformers And Rectifiers (India)",
     "sector": "Capital Goods"
-  },
-  "TRAVELFOOD": {
-    "name": "Travel Food Services",
-    "sector": "Consumer Services"
   },
   "TRENT": {
     "name": "Trent",
@@ -1919,9 +1883,25 @@
     "name": "Varun Beverages",
     "sector": "Fast Moving Consumer Goods"
   },
+  "VAML": {
+    "name": "Vedanta Aluminium Metal",
+    "sector": "Metals & Mining"
+  },
+  "VISL": {
+    "name": "Vedanta Iron and Steel",
+    "sector": "Metals & Mining"
+  },
   "VEDL": {
     "name": "Vedanta",
     "sector": "Metals & Mining"
+  },
+  "VOGL": {
+    "name": "Vedanta Oil and Gas",
+    "sector": "Oil Gas & Consumable Fuels"
+  },
+  "VEDPOWER": {
+    "name": "Vedanta Power",
+    "sector": "Power"
   },
   "VIJAYA": {
     "name": "Vijaya Diagnostic Centre",
