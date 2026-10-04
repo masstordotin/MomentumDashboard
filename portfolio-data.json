@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-10T09:01:00.006Z",
+  "updatedAt": "2026-10-04T18:34:19.938Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -267,6 +267,17 @@
       "sector": "Healthcare",
       "addedDate": "2026-07-10",
       "addedPrice": 807.15,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_muu5ttyxo2yve",
+      "symbol": "TDPOWERSYS",
+      "name": "TD Power Systems",
+      "sector": "Capital Goods",
+      "addedDate": "2026-10-04",
+      "addedPrice": 792.15,
       "manualPrice": null,
       "priceUpdatedAt": null,
       "notes": ""
