@@ -27,6 +27,9 @@ YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?ra
 OUTPUT_FILE = "momentum-picks.json"
 NUM_PICKS = 15
 MAX_WORKERS = 12
+NSE_REQUEST_TIMEOUT = 8
+NSE_WARM_UP_RETRIES = 1
+NSE_BHAVCOPY_RETRIES = 1
 
 # NSE's own end-of-day settlement file (bhavcopy) - the actual source of
 # truth for a session's close, published directly by the exchange rather
@@ -357,30 +360,26 @@ def _drop_unconfirmed_today(raw: Dict[str, Any], today_str: str, bhav_day: Optio
     }
 
 
-def _warm_up_nse_session(opener, retries: int = 2, backoff_base: float = 1.5) -> None:
-    """Visits a short sequence of real NSE pages (discarding their bodies -
-    only the cookies collected by `opener`'s cookie jar matter) so the
-    bhavcopy request below looks like it came from a browser that actually
-    browsed the site, not a bare script. NSE's data endpoints reject requests
-    lacking this. Failures on individual warm-up pages are swallowed - we
-    only give up on the whole warm-up if every path fails every retry."""
-    any_success = False
+def _warm_up_nse_session(opener, retries: int = NSE_WARM_UP_RETRIES, backoff_base: float = 1.5) -> None:
+    """Visits real NSE pages until one succeeds (discarding the body - only
+    the cookies collected by `opener`'s cookie jar matter) so the bhavcopy
+    request below looks browser-like instead of like a bare script. Failures
+    on individual warm-up pages are swallowed; we only give up if every path
+    fails every retry."""
     for path in NSE_WARM_UP_PATHS:
         for attempt in range(retries):
             try:
                 req = Request(NSE_BASE_URL + path, headers=NSE_BROWSER_HEADERS)
-                with opener.open(req, timeout=15) as resp:
+                with opener.open(req, timeout=NSE_REQUEST_TIMEOUT) as resp:
                     resp.read(2048)
-                any_success = True
-                break
+                return
             except Exception:
                 if attempt < retries - 1:
                     time.sleep(backoff_base * (attempt + 1))
-    if not any_success:
-        raise RuntimeError("NSE session warm-up failed on every path")
+    raise RuntimeError("NSE session warm-up failed on every path")
 
 
-def fetch_bhavcopy(max_lookback_days: int = 7, retries: int = 3, backoff_base: float = 2.0) -> Optional[Dict[str, Dict[str, Any]]]:
+def fetch_bhavcopy(max_lookback_days: int = 7, retries: int = NSE_BHAVCOPY_RETRIES, backoff_base: float = 2.0) -> Optional[Dict[str, Dict[str, Any]]]:
     """Fetches NSE's official end-of-day bhavcopy - the exchange's own
     settlement file with every listed security's OHLC/volume for one trading
     day - and returns {SYMBOL: {"close", "high", "low", "volume", "asOf"}}
@@ -422,7 +421,7 @@ def fetch_bhavcopy(max_lookback_days: int = 7, retries: int = 3, backoff_base: f
         for attempt in range(retries):
             try:
                 req = Request(url, headers=NSE_BROWSER_HEADERS)
-                with opener.open(req, timeout=20) as resp:
+                with opener.open(req, timeout=NSE_REQUEST_TIMEOUT) as resp:
                     content = resp.read().decode("utf-8", errors="replace")
                 break
             except Exception:
