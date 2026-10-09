@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-04T18:34:19.938Z",
+  "updatedAt": "2026-10-09T08:34:00.909Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -278,6 +278,72 @@
       "sector": "Capital Goods",
       "addedDate": "2026-10-04",
       "addedPrice": 792.15,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0n6iafv3305",
+      "symbol": "CHENNPETRO",
+      "name": "Chennai Petroleum Corporation",
+      "sector": "Oil Gas & Consumable Fuels",
+      "addedDate": "2026-10-09",
+      "addedPrice": 1612.3,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0nh6r8ewrqt",
+      "symbol": "PTCIL",
+      "name": "PTC Industries",
+      "sector": "Capital Goods",
+      "addedDate": "2026-10-09",
+      "addedPrice": 24685,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0nhg8xv53e1",
+      "symbol": "AEGISLOG",
+      "name": "Aegis Logistics",
+      "sector": "Oil Gas & Consumable Fuels",
+      "addedDate": "2026-10-09",
+      "addedPrice": 1460.2,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0pjr2tey4oq",
+      "symbol": "BHEL",
+      "name": "Bharat Heavy Electricals",
+      "sector": "Capital Goods",
+      "addedDate": "2026-10-09",
+      "addedPrice": 448.5,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0pk6s6153ky",
+      "symbol": "MRPL",
+      "name": "Mangalore Refinery & Petrochemicals",
+      "sector": "Oil Gas & Consumable Fuels",
+      "addedDate": "2026-10-09",
+      "addedPrice": 182.86,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0pkgc06tjml",
+      "symbol": "KOTAKBANK",
+      "name": "Kotak Mahindra Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-10-09",
+      "addedPrice": 440,
       "manualPrice": null,
       "priceUpdatedAt": null,
       "notes": ""
