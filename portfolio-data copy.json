@@ -1,0 +1,496 @@
+{
+  "updatedAt": "2026-10-09T08:34:00.909Z",
+  "paperAccount": {
+    "startingCapital": 50000,
+    "cashBalance": 50000
+  },
+  "watchlist": [
+    {
+      "id": "id_mraj0usd5u5ev",
+      "symbol": "ABDL",
+      "name": "ABDL",
+      "sector": "—",
+      "addedDate": "2026-07-07",
+      "addedPrice": 690,
+      "manualPrice": 674.8,
+      "notes": "",
+      "priceUpdatedAt": "2026-07-08T23:28:41.644Z"
+    },
+    {
+      "id": "id_mraj2ylqk7tvq",
+      "symbol": "ADANIENT",
+      "name": "Adani Enterprises",
+      "sector": "Metals & Mining",
+      "addedDate": "2026-07-07",
+      "addedPrice": 3143.6,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj37k8m7dzn",
+      "symbol": "IKS",
+      "name": "Inventurus Knowledge Solutions",
+      "sector": "Information Technology",
+      "addedDate": "2026-07-07",
+      "addedPrice": 1800.2,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj3k6xajrgg",
+      "symbol": "JSWINFRA",
+      "name": "JSW Infrastructure",
+      "sector": "Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 330.45,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mraj3rf49h8dn",
+      "symbol": "ADANIPORTS",
+      "name": "Adani Ports and Special Economic Zone",
+      "sector": "Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 1848.2,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap32wy3pwq0",
+      "symbol": "GLAND",
+      "name": "Gland Pharma",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-07",
+      "addedPrice": 2550,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap3geg3gpvc",
+      "symbol": "INDUSINDBK",
+      "name": "IndusInd Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 1022.25,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap3qiiw8o2d",
+      "symbol": "CGCL",
+      "name": "Capri Global Capital",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-07",
+      "addedPrice": 237.47,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap4547ti1e0",
+      "symbol": "GRANULES",
+      "name": "Granules India",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-07",
+      "addedPrice": 863.55,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrap4khygyyjj",
+      "symbol": "PHOENIXLTD",
+      "name": "Phoenix Mills",
+      "sector": "Realty",
+      "addedDate": "2026-07-07",
+      "addedPrice": 2075.1,
+      "manualPrice": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpi31xmeor1",
+      "symbol": "J&KBANK",
+      "name": "Jammu & Kashmir Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-08",
+      "addedPrice": 165.96,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpisokrxcku",
+      "symbol": "EXIDEIND",
+      "name": "Exide Industries",
+      "sector": "Automobile and Auto Components",
+      "addedDate": "2026-07-08",
+      "addedPrice": 421.35,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpjde9gk3ad",
+      "symbol": "INDUSINDBK",
+      "name": "IndusInd Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-07-08",
+      "addedPrice": 994.65,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpkantcpt6a",
+      "symbol": "SONACOMS",
+      "name": "Sona BLW Precision Forgings",
+      "sector": "Automobile and Auto Components",
+      "addedDate": "2026-07-08",
+      "addedPrice": 662.05,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpkm75ds14r",
+      "symbol": "ZYDUSLIFE",
+      "name": "Zydus Lifesciences",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-08",
+      "addedPrice": 1148,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpkz1nnldla",
+      "symbol": "ATHERENERG",
+      "name": "Ather Energy",
+      "sector": "Automobile and Auto Components",
+      "addedDate": "2026-07-08",
+      "addedPrice": 1200,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrcpl87efipqi",
+      "symbol": "TORNTPHARM",
+      "name": "Torrent Pharmaceuticals",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-08",
+      "addedPrice": 4866.4,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremeal5gefsa",
+      "symbol": "SYRMA",
+      "name": "Syrma SGS Technology",
+      "sector": "Capital Goods",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1441,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremej3kh4tqj",
+      "symbol": "WELCORP",
+      "name": "Welspun Corp",
+      "sector": "Capital Goods",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1601.9,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremf86flypyw",
+      "symbol": "GRAVITA",
+      "name": "GRAVITA",
+      "sector": "Metals & Mining",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1811.4,
+      "manualPrice": 1811.4,
+      "priceUpdatedAt": "2026-07-10T07:35:21.639Z",
+      "notes": ""
+    },
+    {
+      "id": "id_mremfpl7ylw7x",
+      "symbol": "TITAN",
+      "name": "TITAN",
+      "sector": "Consumer Durables",
+      "addedDate": "2026-07-10",
+      "addedPrice": 4555.8,
+      "manualPrice": 4555.8,
+      "priceUpdatedAt": "2026-07-10T07:35:44.203Z",
+      "notes": ""
+    },
+    {
+      "id": "id_mremhya2crq8z",
+      "symbol": "SUNPHARMA",
+      "name": "Sun Pharmaceutical Industries",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1938.7,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mremibj42zxn4",
+      "symbol": "JINDALSAW",
+      "name": "Jindal Saw",
+      "sector": "Capital Goods",
+      "addedDate": "2026-07-10",
+      "addedPrice": 272.3,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrepglzg4dhz7",
+      "symbol": "RAINBOW",
+      "name": "Rainbow Childrens Medicare",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-10",
+      "addedPrice": 1481.5,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mrepgtzer6f02",
+      "symbol": "ASTERDM",
+      "name": "Aster DM Healthcare",
+      "sector": "Healthcare",
+      "addedDate": "2026-07-10",
+      "addedPrice": 807.15,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_muu5ttyxo2yve",
+      "symbol": "TDPOWERSYS",
+      "name": "TD Power Systems",
+      "sector": "Capital Goods",
+      "addedDate": "2026-10-04",
+      "addedPrice": 792.15,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0n6iafv3305",
+      "symbol": "CHENNPETRO",
+      "name": "Chennai Petroleum Corporation",
+      "sector": "Oil Gas & Consumable Fuels",
+      "addedDate": "2026-10-09",
+      "addedPrice": 1612.3,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0nh6r8ewrqt",
+      "symbol": "PTCIL",
+      "name": "PTC Industries",
+      "sector": "Capital Goods",
+      "addedDate": "2026-10-09",
+      "addedPrice": 24685,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0nhg8xv53e1",
+      "symbol": "AEGISLOG",
+      "name": "Aegis Logistics",
+      "sector": "Oil Gas & Consumable Fuels",
+      "addedDate": "2026-10-09",
+      "addedPrice": 1460.2,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0pjr2tey4oq",
+      "symbol": "BHEL",
+      "name": "Bharat Heavy Electricals",
+      "sector": "Capital Goods",
+      "addedDate": "2026-10-09",
+      "addedPrice": 448.5,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0pk6s6153ky",
+      "symbol": "MRPL",
+      "name": "Mangalore Refinery & Petrochemicals",
+      "sector": "Oil Gas & Consumable Fuels",
+      "addedDate": "2026-10-09",
+      "addedPrice": 182.86,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mv0pkgc06tjml",
+      "symbol": "KOTAKBANK",
+      "name": "Kotak Mahindra Bank",
+      "sector": "Financial Services",
+      "addedDate": "2026-10-09",
+      "addedPrice": 440,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    }
+  ],
+  "paperTrades": [],
+  "holdings": [
+    {
+      "id": "id_mrbwnpl2nmry3",
+      "symbol": "ADANIPORTS",
+      "name": "ADANIPORTS",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 3,
+      "avgBuyPrice": 1518.917,
+      "buyDate": "2026-07-08",
+      "manualPrice": 1518.917
+    },
+    {
+      "id": "id_mrbwp50qxh90q",
+      "symbol": "BELRISE",
+      "name": "BELRISE",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 850,
+      "avgBuyPrice": 118.308,
+      "buyDate": "2026-07-08",
+      "manualPrice": 118.308
+    },
+    {
+      "id": "id_mrbwq77ic57xi",
+      "symbol": "ITC",
+      "name": "ITC",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 10,
+      "avgBuyPrice": 429,
+      "buyDate": "2026-07-08",
+      "manualPrice": 429
+    },
+    {
+      "id": "id_mrbwqwpemmqoq",
+      "symbol": "JPPOWER",
+      "name": "JPPOWER",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 4000,
+      "avgBuyPrice": 18.959,
+      "buyDate": "2026-07-08",
+      "manualPrice": 18.959
+    },
+    {
+      "id": "id_mrbwrld8f1k61",
+      "symbol": "NBCC",
+      "name": "NBCC",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 375,
+      "avgBuyPrice": 133,
+      "buyDate": "2026-07-08",
+      "manualPrice": 133
+    },
+    {
+      "id": "id_mrbwt9j9mpmo7",
+      "symbol": "POWERGRID",
+      "name": "POWERGRID",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 15,
+      "avgBuyPrice": 332,
+      "buyDate": "2026-07-08",
+      "manualPrice": 332
+    },
+    {
+      "id": "id_mrbwu0yaczmy9",
+      "symbol": "RAYMONDREL",
+      "name": "RAYMONDREL",
+      "sector": "Real Estate Development",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 100,
+      "avgBuyPrice": 489.94,
+      "buyDate": "2026-07-08",
+      "manualPrice": 665.65,
+      "priceUpdatedAt": "2026-07-08T23:35:30.571Z"
+    },
+    {
+      "id": "id_mrbwukm0au5kc",
+      "symbol": "SAMMAANCAP",
+      "name": "SAMMAANCAP",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 260,
+      "avgBuyPrice": 136.5,
+      "buyDate": "2026-07-08",
+      "manualPrice": 136.5
+    },
+    {
+      "id": "id_mrbwv4j4loo1y",
+      "symbol": "SUNPHARMA",
+      "name": "SUNPHARMA",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 10,
+      "avgBuyPrice": 1735.934,
+      "buyDate": "2026-07-08",
+      "manualPrice": 1735.934
+    },
+    {
+      "id": "id_mrbww59wgh8je",
+      "symbol": "TATACAP",
+      "name": "TATACAP",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 46,
+      "avgBuyPrice": 326,
+      "buyDate": "2026-07-08",
+      "manualPrice": 326
+    },
+    {
+      "id": "id_mrbwyk07qmfxe",
+      "symbol": "TCS",
+      "name": "TCS",
+      "sector": "Unknown",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 23,
+      "avgBuyPrice": 3793.84,
+      "buyDate": "2026-07-08",
+      "manualPrice": 3793.84
+    },
+    {
+      "id": "id_mrcm1iex575zr",
+      "symbol": "PARACABLES",
+      "name": "PARACABLES",
+      "sector": "Electrical Products",
+      "portfolioId": "id_ikshitrawal41157",
+      "qty": 2150,
+      "avgBuyPrice": 89,
+      "buyDate": "2026-07-08",
+      "manualPrice": 89,
+      "priceUpdatedAt": "2026-07-08T21:49:09.369Z"
+    }
+  ],
+  "portfolios": [
+    {
+      "id": "id_ikshitrawal41157",
+      "name": "Ikshit Rawal",
+      "clientCode": "41157"
+    }
+  ]
+}
