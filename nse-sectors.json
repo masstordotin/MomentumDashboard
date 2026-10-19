@@ -1203,6 +1203,10 @@
     "name": "MRF",
     "sector": "Automobile and Auto Components"
   },
+  "MTARTECH": {
+    "name": "MTAR Technologies",
+    "sector": "Capital Goods"
+  },
   "MGL": {
     "name": "Mahanagar Gas",
     "sector": "Oil Gas & Consumable Fuels"
