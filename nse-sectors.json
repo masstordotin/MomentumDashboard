@@ -863,16 +863,16 @@
     "name": "ICICI Bank",
     "sector": "Financial Services"
   },
+  "ICICILIFE": {
+    "name": "ICICI Life Insurance",
+    "sector": "Financial Services"
+  },
   "ICICIGI": {
     "name": "ICICI Lombard General Insurance Company",
     "sector": "Financial Services"
   },
   "ICICIAMC": {
     "name": "ICICI Prudential Asset Management Company",
-    "sector": "Financial Services"
-  },
-  "ICICIPRULI": {
-    "name": "ICICI Prudential Life Insurance Company",
     "sector": "Financial Services"
   },
   "IDBI": {
