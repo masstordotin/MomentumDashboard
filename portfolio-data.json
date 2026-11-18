@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-09T08:34:00.909Z",
+  "updatedAt": "2026-11-18T09:16:35.944Z",
   "paperAccount": {
     "startingCapital": 50000,
     "cashBalance": 50000
@@ -344,6 +344,17 @@
       "sector": "Financial Services",
       "addedDate": "2026-10-08",
       "addedPrice": 440,
+      "manualPrice": null,
+      "priceUpdatedAt": null,
+      "notes": ""
+    },
+    {
+      "id": "id_mwlwpvn827edr",
+      "symbol": "ANGELONE",
+      "name": "Angel One",
+      "sector": "Financial Services",
+      "addedDate": "2026-11-18",
+      "addedPrice": 349.8,
       "manualPrice": null,
       "priceUpdatedAt": null,
       "notes": ""
